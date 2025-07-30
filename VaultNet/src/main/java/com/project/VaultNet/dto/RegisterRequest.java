@@ -1,0 +1,18 @@
+package com.project.VaultNet.dto;
+
+import com.project.VaultNet.model.Role;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RegisterRequest {
+    private String username;
+    private String email;
+    private String password;
+    private String fullName;
+    private String phone;
+    private Role role;
+}
