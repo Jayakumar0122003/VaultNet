@@ -9,12 +9,12 @@ import java.util.Map;
 public class TokenStoreService {
     private final Map<String, String> refreshTokens = new HashMap<>();
 
-    public void storeRefreshToken(String username, String token) {
-        refreshTokens.put(username, token);
+    public void storeRefreshToken(String email, String token) {
+        refreshTokens.put(email, token);
     }
 
-    public boolean isValidRefreshToken(String username, String token) {
-        return token.equals(refreshTokens.get(username));
+    public boolean isValidRefreshToken(String email, String token) {
+        return token.equals(refreshTokens.get(email));
     }
 
     public void deleteRefreshToken(String username) {

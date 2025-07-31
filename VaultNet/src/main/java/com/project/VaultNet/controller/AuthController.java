@@ -4,6 +4,7 @@ import com.project.VaultNet.dto.AuthRequest;
 import com.project.VaultNet.dto.RegisterRequest;
 import com.project.VaultNet.dto.RegisterResponse;
 import com.project.VaultNet.model.Users;
+import com.project.VaultNet.service.DebitCardService;
 import com.project.VaultNet.service.JwtService;
 import com.project.VaultNet.service.TokenStoreService;
 import com.project.VaultNet.service.UserService;
@@ -16,14 +17,9 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -40,6 +36,9 @@ public class AuthController {
 
     @Autowired
     TokenStoreService tokenStore;
+
+    @Autowired
+    DebitCardService debitCardService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
@@ -63,10 +62,10 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletResponse response) {
         // Authenticate user credentials
         authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        Users user = userService.getUserByUsername(request.getUsername())
+        Users user = userService.getUserByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String accessToken = jwtService.generateToken(user, 1000 * 60 * 15); // 15 min
@@ -91,6 +90,14 @@ public class AuthController {
         ));
     }
 
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyAccount(@RequestParam("token") String token) {
+        Users user =userService.getVerify(token);
+        debitCardService.sendVirtualCardEmail(user.getEmail(), user.getFullName(), user.getPhone());
+        return ResponseEntity.ok("Email verified successfully. You can now log in.");
+    }
+
+
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request) {
         String refreshToken = Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
@@ -103,12 +110,12 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing refresh token");
         }
 
-        String username = jwtService.extractUsername(refreshToken);
+        String email = jwtService.extractUsername(refreshToken);
 
-        if (!tokenStore.isValidRefreshToken(username, refreshToken)) {
+        if (!tokenStore.isValidRefreshToken(email, refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token invalid or revoked");
         }
-        Users user = userService.getUserByUsername(username)
+        Users user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String newAccessToken = jwtService.generateToken(user, 1000 * 60 * 15);

@@ -24,7 +24,7 @@ public class JwtService {
 
     public String generateToken(Users user, long expirationMs) {
         return Jwts.builder()
-                .subject(user.getUsername())
+                .subject(user.getEmail())
                 .claim("role", user.getRole().name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs)) // 1 day

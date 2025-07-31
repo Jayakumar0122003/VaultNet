@@ -34,16 +34,11 @@ public class Users {
     @Column(nullable = false, length = 50)
     private Role role;
 
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
 
-    private boolean emailVerified;
-
-    private String cardNumber;
-
-    private String cardCVV;
-
-    private String cardExpiry;
-
-    private double balance;
+    @Column(name = "verification_token")
+    private String verificationToken;
 
     private Date createdAt;
 
@@ -52,4 +47,7 @@ public class Users {
 
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
     private List<Transaction> receivedTransactions;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private DebitCard debitCard;
 }
