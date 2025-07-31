@@ -69,7 +69,7 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String accessToken = jwtService.generateToken(user, 1000 * 60 * 15); // 15 min
-        String refreshToken = jwtService.generateToken(user, 1000L * 60 * 60 * 24 * 7); // 7 days
+        String refreshToken = jwtService.generateToken(user, 1000 * 60 * 60 * 24 * 7); // 7 days
 
         tokenStore.storeRefreshToken(user.getUsername(), refreshToken);
 

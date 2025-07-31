@@ -50,4 +50,6 @@ public class Users {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private DebitCard debitCard;
+
+    private Long balance;
 }
