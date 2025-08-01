@@ -37,6 +37,7 @@ public class DebitCardService {
 
             // Generate card details
             String cardNumber = generateCardNumber();
+            String accountNumber = generateCardNumber();
             String cvv = generateCVV();
             String expiry = generateExpiryDate();
 
@@ -44,6 +45,7 @@ public class DebitCardService {
             DebitCard card = new DebitCard();
             card.setCardHolderName(fullName);
             card.setCardNumber(cardNumber);
+            card.setAccountNumber(accountNumber);
             card.setCvv(cvv);
             card.setExpiryDate(expiry);
             card.setEmail(email);

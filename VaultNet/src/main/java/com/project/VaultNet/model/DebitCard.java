@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,16 +20,48 @@ public class DebitCard {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String accountNumber;
+
+    @Column(nullable = false)
     private String cardHolderName;
+
+    @Column(nullable = false, unique = true)
     private String cardNumber;
-    private String expiryDate;
+
+    @Column(nullable = false)
+    private String expiryDate; // optionally convert to YearMonth for validation
+
+    @Column(nullable = false)
     private String cvv;
+
+    @Column(nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String phone;
+
+    @CreationTimestamp
     private LocalDateTime issuedAt;
 
-    @OneToOne
+    @Column(name = "pin_hash", length = 60)
+    private String pinHash;
+
+    @Column(precision = 19, scale = 4)
+    private BigDecimal balance = BigDecimal.ZERO;
+
+    @Column(name = "is_pin_set")
+    private boolean pinSet = false;
+
+    // OTP storage (hashed) and expiration
+    @Column(name = "otp_hash", length = 60)
+    private String otpHash;
+
+    private LocalDateTime otpExpiresAt;
+
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
+
 
 }

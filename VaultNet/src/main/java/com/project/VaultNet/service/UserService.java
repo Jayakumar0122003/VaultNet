@@ -1,16 +1,17 @@
 package com.project.VaultNet.service;
 
-import com.project.VaultNet.dto.RegisterRequest;
+import com.project.VaultNet.dto.*;
+import com.project.VaultNet.model.DebitCard;
 import com.project.VaultNet.model.Users;
+import com.project.VaultNet.repository.DebitCardRepository;
 import com.project.VaultNet.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
-import com.project.VaultNet.service.EmailServiceImp;
 
 @Service
 public class UserService {
@@ -24,6 +25,11 @@ public class UserService {
     @Autowired
     EmailServiceImp emailServiceImp;
 
+    @Autowired
+    DebitCardRepository debitCardRepository;
+
+    private final Random random = new Random();
+
     public Optional<Users> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -31,10 +37,10 @@ public class UserService {
 
     public Users registerUser(RegisterRequest request) {
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("Email already exists");
         }
         if(userRepository.existsByUsername(request.getUsername())){
-            throw new RuntimeException("Email already exists");
+            throw new RuntimeException("Username already exists");
         }
 
         String token = UUID.randomUUID().toString();
@@ -65,4 +71,44 @@ public class UserService {
         user.setVerificationToken(null);
         return userRepository.save(user);
     }
+
+
+
+    public SetPinResponse setPin(SetPinRequest request) {
+        Optional<DebitCard> optionalCard = debitCardRepository.findByPhoneEndingWith(request.getLastFourDigits());
+
+        if (optionalCard.isEmpty()) {
+            return new SetPinResponse(false, "No card found with matching phone number.");
+        }
+
+        DebitCard card = optionalCard.get();
+
+        if (card.isPinSet()) {
+            return new SetPinResponse(false, "PIN is already set.");
+        }
+
+        String hashedPin = passwordEncoder.encode(request.getPin());
+        card.setPinHash(hashedPin);
+        card.setPinSet(true);
+        debitCardRepository.save(card);
+
+        return new SetPinResponse(true, "PIN set successfully.");
+    }
+
+    public ChangePinResponse changePin(ChangePinRequest changePinRequest) {
+        DebitCard card = debitCardRepository.findByEmail(changePinRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email not found"));
+
+
+        if (!passwordEncoder.matches(changePinRequest.getOldPin(), card.getPinHash())) {
+            throw new RuntimeException("Old PIN does not match");
+        }
+
+        String newHashedPin = passwordEncoder.encode(changePinRequest.getNewPin());
+        card.setPinHash(newHashedPin);
+
+        debitCardRepository.save(card);
+        return new ChangePinResponse(true, "Pin Change Successfully!");
+    }
 }
+
