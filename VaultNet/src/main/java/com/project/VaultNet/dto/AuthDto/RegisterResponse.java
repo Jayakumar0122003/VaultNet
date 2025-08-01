@@ -1,18 +1,21 @@
-package com.project.VaultNet.dto;
+package com.project.VaultNet.dto.AuthDto;
 
 import com.project.VaultNet.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class RegisterResponse {
+    private UUID id;
     private String username;
     private String email;
-    private String password;
-    private String fullName;
-    private String phone;
     private Role role;
+    private String fullName;
+
+
 }

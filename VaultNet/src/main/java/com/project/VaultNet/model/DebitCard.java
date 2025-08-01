@@ -63,5 +63,15 @@ public class DebitCard {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
 
+    @Column(name = "failed_attempts")
+    private int failedAttempts = 0;
+
+    @Column(name = "card_blocked")
+    private boolean cardBlocked = false;
+
+    @Column(name = "blocked_at")
+    private LocalDateTime blockedAt;
+
+
 
 }

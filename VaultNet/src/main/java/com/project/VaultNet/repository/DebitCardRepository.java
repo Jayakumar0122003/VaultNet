@@ -9,4 +9,6 @@ public interface DebitCardRepository extends JpaRepository<DebitCard, Long> {
 
     Optional<DebitCard> findByPhoneEndingWith(String lastFourDigits);
     Optional<DebitCard> findByEmail(String email);
+    Optional<DebitCard> findByAccountNumber(String accountNumber);
+    Optional<DebitCard> findByCardNumber(String accountNumber);
 }

@@ -1,4 +1,4 @@
-package com.project.VaultNet.dto;
+package com.project.VaultNet.dto.cardPinDto;
 
 import lombok.Data;
 

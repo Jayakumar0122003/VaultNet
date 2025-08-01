@@ -1,8 +1,8 @@
 package com.project.VaultNet.controller;
 
-import com.project.VaultNet.dto.AuthRequest;
-import com.project.VaultNet.dto.RegisterRequest;
-import com.project.VaultNet.dto.RegisterResponse;
+import com.project.VaultNet.dto.AuthDto.AuthRequest;
+import com.project.VaultNet.dto.AuthDto.RegisterRequest;
+import com.project.VaultNet.dto.AuthDto.RegisterResponse;
 import com.project.VaultNet.model.Users;
 import com.project.VaultNet.service.DebitCardService;
 import com.project.VaultNet.service.JwtService;
@@ -92,9 +92,27 @@ public class AuthController {
 
     @GetMapping("/verify")
     public ResponseEntity<?> verifyAccount(@RequestParam("token") String token) {
-        Users user =userService.getVerify(token);
-        debitCardService.sendVirtualCardEmail(user.getEmail(), user.getFullName(), user.getPhone());
-        return ResponseEntity.ok("Email verified successfully. You can now log in.");
+        try {
+            Users user = userService.getVerify(token);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Invalid or expired token.");
+            }
+
+            if ("CUSTOMER".equals(user.getRole())) {
+                debitCardService.sendVirtualCardEmail(
+                        user.getEmail(),
+                        user.getFullName(),
+                        user.getPhone()
+                );
+            }
+
+            return ResponseEntity.ok("Email verified successfully. You can now log in.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred during verification: " + e.getMessage());
+        }
     }
 
 
