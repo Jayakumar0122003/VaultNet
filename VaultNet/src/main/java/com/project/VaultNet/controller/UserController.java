@@ -4,6 +4,9 @@ import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
 import com.project.VaultNet.dto.TransactionDto.*;
 import com.project.VaultNet.dto.cardPinDto.*;
+import com.project.VaultNet.dto.details.AccountDetails;
+import com.project.VaultNet.dto.details.DebitCardDetails;
+import com.project.VaultNet.dto.details.DebitCardDetailsRequest;
 import com.project.VaultNet.model.Role;
 import com.project.VaultNet.model.Transaction;
 import com.project.VaultNet.model.Users;
@@ -116,4 +119,16 @@ public class UserController {
     public AccountCreationResponse createAccount(@RequestBody AccountCreationRequest request) {
         return userService.createAccount(request);
     }
+
+    @GetMapping("/get-account-details/{userId}")
+    public AccountDetails getAccountDetails(
+            @PathVariable("userId") Long userId) {
+        return userService.getAccountDetails(userId);
+    }
+
+    @PostMapping("/get-card-details")
+    public DebitCardDetails getCardDetails(@RequestBody DebitCardDetailsRequest request){
+        return userService.getCardDetails(request);
+    }
+
 }
