@@ -44,14 +44,14 @@ public class Users {
     @Embedded
     private Address address;
 
-    @Column(name = "dob", nullable = false)
+    @Column(name = "dob")
     private LocalDate dob;
 
     @Column(name = "email_verified")
     private boolean emailVerified = false;
 
     @Column(name = "account_created")
-    private boolean account_created = false;
+    private boolean accountCreated = false;
 
     @Column(name = "verification_token")
     private String verificationToken;

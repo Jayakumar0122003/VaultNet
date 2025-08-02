@@ -26,5 +26,6 @@ public class Address {
     @Column(length = 100)
     private String country = "India";
 
+
 }
 

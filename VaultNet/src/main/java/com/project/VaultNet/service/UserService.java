@@ -1,7 +1,10 @@
 package com.project.VaultNet.service;
 
+import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
+import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
 import com.project.VaultNet.dto.AuthDto.RegisterRequest;
 import com.project.VaultNet.dto.cardPinDto.*;
+import com.project.VaultNet.model.Address;
 import com.project.VaultNet.model.DebitCard;
 import com.project.VaultNet.model.Users;
 import com.project.VaultNet.repository.DebitCardRepository;
@@ -53,7 +56,6 @@ public class UserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
-                .verificationToken(token)
                 .build();
 //        String verificationLink = "http://localhost:8080/api/auth/verify?token=" + token;
 
@@ -165,6 +167,37 @@ public class UserService {
 
         return new VerifyPinOtpResponse(true,"PIN set successfully");
 
+    }
+
+    @Transactional
+    public AccountCreationResponse createAccount(AccountCreationRequest request) {
+        return userRepository.findByEmail(request.getEmail())
+                .map(user -> {
+                    if (user.isAccountCreated()) {
+                        return new AccountCreationResponse(false, "Account already exists for email: " + request.getEmail());
+                    }
+                    String token = UUID.randomUUID().toString();
+                    // Populate user details
+                    user.setFirstName(request.getFirstName());
+                    user.setLastName(request.getLastName());
+                    user.setPhone(request.getPhone());
+                    user.setDob(request.getDob());
+                    Address address = new Address();
+                    address.setAddressLine(request.getAddressLine());
+                    address.setCity(request.getCity());
+                    address.setState(request.getState());
+                    address.setPostalCode(request.getPostalCode());
+                    user.setAddress(address);
+                    user.setAccountCreated(true);
+                    user.setVerificationToken(token);
+                    userRepository.save(user);
+
+                     String verificationLink = "http://localhost:8080/api/customer/verify?token=" + token;
+                     emailServiceImp.sendVerificationEmail(user.getEmail(), verificationLink, user.getFirstName() + " " + user.getLastName());
+
+                    return new AccountCreationResponse(true, "Account successfully created");
+                })
+                .orElseGet(() -> new AccountCreationResponse(false, "Invalid email address: " + request.getEmail()));
     }
 }
 

@@ -90,31 +90,6 @@ public class AuthController {
         ));
     }
 
-    @GetMapping("/verify")
-    public ResponseEntity<?> verifyAccount(@RequestParam("token") String token) {
-        try {
-            Users user = userService.getVerify(token);
-
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Invalid or expired token.");
-            }
-
-//            if (user.getRole() == Role.CUSTOMER) {
-//                debitCardService.sendVirtualCardEmail(
-//                        user.getEmail(),
-//                        user.getFullName(),
-//                        user.getPhone()
-//                );
-//            }
-
-            return ResponseEntity.ok("Email verified successfully. You can now log in.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred during verification: " + e.getMessage());
-        }
-    }
-
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request) {
