@@ -54,8 +54,8 @@ public class DebitCard {
     private boolean pinSet = false;
 
     // OTP storage (hashed) and expiration
-    @Column(name = "otp_hash", length = 60)
-    private String otpHash;
+    @Column(name = "otp", length = 60)
+    private String otp;
 
     private LocalDateTime otpExpiresAt;
 

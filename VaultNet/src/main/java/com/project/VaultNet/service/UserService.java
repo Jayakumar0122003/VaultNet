@@ -1,18 +1,17 @@
 package com.project.VaultNet.service;
 
 import com.project.VaultNet.dto.AuthDto.RegisterRequest;
-import com.project.VaultNet.dto.cardPinDto.ChangePinRequest;
-import com.project.VaultNet.dto.cardPinDto.ChangePinResponse;
-import com.project.VaultNet.dto.cardPinDto.SetPinRequest;
-import com.project.VaultNet.dto.cardPinDto.SetPinResponse;
+import com.project.VaultNet.dto.cardPinDto.*;
 import com.project.VaultNet.model.DebitCard;
 import com.project.VaultNet.model.Users;
 import com.project.VaultNet.repository.DebitCardRepository;
 import com.project.VaultNet.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -113,6 +112,34 @@ public class UserService {
 
         debitCardRepository.save(card);
         return new ChangePinResponse(true, "Pin Change Successfully!");
+
+    }
+
+    @Transactional
+    public ForgotPinResponse sendOtp(ForgotPinRequest request) {
+        // Always return generic success
+        ForgotPinResponse generic = new ForgotPinResponse(true,
+                "If that email exists, an OTP has been sent.");
+
+        Optional<DebitCard> opt = debitCardRepository.findByEmail(request.getEmail());
+        if (opt.isEmpty()) {
+            return generic;
+        }
+
+        DebitCard card = opt.get();
+
+        // generate 6-digit OTP
+        int otp = 100_000 + random.nextInt(900_000);
+        String otpStr = String.valueOf(otp);
+
+        // hash & store TTL = now + 5min
+        card.setOtp(otpStr);
+        card.setOtpExpiresAt(LocalDateTime.now().plusMinutes(5));
+        debitCardRepository.save(card);
+
+        emailServiceImp.sendOtpForgotPin(card.getEmail(),otpStr,card.getCardHolderName());
+
+        return generic;
     }
 }
 

@@ -45,4 +45,28 @@ public class EmailServiceImp implements EmailService {
             throw new RuntimeException("Failed to send email", e);
         }
     }
+    @Override
+    public void sendOtpForgotPin(String toEmail, String otp, String name) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+
+            Context context = new Context();
+            context.setVariable("name", name);
+            context.setVariable("otp", otp);
+
+            String htmlContent = templateEngine.process("otp-forgot-pin", context); // Thymeleaf template name
+
+            helper.setTo(toEmail);
+            helper.setSubject("VaultNet - Reset Your PIN (OTP Inside)");
+            helper.setFrom(fromEmail);
+            helper.setText(htmlContent, true); // Set HTML content
+
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send OTP email", e);
+        }
+    }
+
 }
