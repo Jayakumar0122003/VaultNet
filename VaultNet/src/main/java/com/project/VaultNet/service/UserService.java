@@ -3,9 +3,10 @@ package com.project.VaultNet.service;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
 import com.project.VaultNet.dto.AuthDto.RegisterRequest;
-import com.project.VaultNet.dto.TransactionDto.MoneyDepositRequest;
-import com.project.VaultNet.dto.TransactionDto.MoneyDepositResponse;
 import com.project.VaultNet.dto.cardPinDto.*;
+import com.project.VaultNet.dto.details.AccountDetails;
+import com.project.VaultNet.dto.details.DebitCardDetails;
+import com.project.VaultNet.dto.details.DebitCardDetailsRequest;
 import com.project.VaultNet.model.Address;
 import com.project.VaultNet.model.DebitCard;
 import com.project.VaultNet.model.Users;
@@ -200,6 +201,44 @@ public class UserService {
                     return new AccountCreationResponse(true, "Account successfully created");
                 })
                 .orElseGet(() -> new AccountCreationResponse(false, "Invalid email address: " + request.getEmail()));
+    }
+
+    public AccountDetails getAccountDetails(Long userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(()-> new RuntimeException("User id is invalid!"));
+        DebitCard debitCard = debitCardRepository.findByEmail(user.getEmail())
+                .orElseThrow(()-> new RuntimeException("Email address invalid!"));
+
+        return getAccountDetails(user, debitCard);
+    }
+
+    private static AccountDetails getAccountDetails(Users user, DebitCard debitCard) {
+        Address address = user.getAddress();
+        return new AccountDetails(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhone(),
+                user.getDob(),
+                address.getAddressLine(),
+                address.getCity(),
+                address.getState(),
+                address.getPostalCode(),
+                debitCard.getAccountNumber()
+        );
+    }
+
+    public DebitCardDetails getCardDetails(DebitCardDetailsRequest request) {
+        DebitCard debitCard = debitCardRepository.findByPhoneEndingWith(request.getLastFourDigitsPhone())
+                .orElseThrow(()-> new RuntimeException("Invalid Digit values"));
+
+        return new DebitCardDetails(
+                debitCard.getId(),
+                debitCard.getCardNumber(),
+                debitCard.getCardHolderName(),
+                debitCard.getExpiryDate()
+        );
     }
 }
 
