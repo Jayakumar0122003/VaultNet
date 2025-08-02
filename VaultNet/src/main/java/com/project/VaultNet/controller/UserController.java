@@ -43,7 +43,7 @@ public class UserController {
         return transactionService.transferMoney(request);
     }
 
-    @PostMapping("/transfer-account")
+    @PostMapping("/transfer-card")
     public TransferViaCardResponse transferMoney(@RequestBody TransferViaCardRequest request) {
         return transactionService.transferUsingCardDetails(request);
     }
