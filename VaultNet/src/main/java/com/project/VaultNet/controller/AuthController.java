@@ -1,8 +1,6 @@
 package com.project.VaultNet.controller;
 
-import com.project.VaultNet.dto.AuthDto.AuthRequest;
-import com.project.VaultNet.dto.AuthDto.RegisterRequest;
-import com.project.VaultNet.dto.AuthDto.RegisterResponse;
+import com.project.VaultNet.dto.AuthDto.*;
 import com.project.VaultNet.model.Role;
 import com.project.VaultNet.model.Users;
 import com.project.VaultNet.service.DebitCardService;
@@ -88,6 +86,16 @@ public class AuthController {
                 "accessToken", accessToken,
                 "role", user.getRole()
         ));
+    }
+
+    @PostMapping("/forgot-password")
+    public ForgotPasswordResponse forgotPassword(@RequestBody ForgotPasswordRequest request){
+        return userService.sendOtpPassword(request);
+    }
+
+    @PostMapping("/reset-password")
+    public ResetPasswordResponse forgotPassword(@RequestBody ResetPasswordRequest request){
+        return userService.resetPassword(request);
     }
 
 

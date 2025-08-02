@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -57,6 +58,13 @@ public class Users {
     private String verificationToken;
 
     private Date createdAt;
+
+    @Column(name = "reset_otp")
+    private String resetOtp;
+
+    @Column(name = "reset_otp_expires_at")
+    private LocalDateTime resetOtpExpiresAt;
+
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private DebitCard debitCard;

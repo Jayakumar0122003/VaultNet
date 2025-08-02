@@ -2,7 +2,7 @@ package com.project.VaultNet.service;
 
 import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
-import com.project.VaultNet.dto.AuthDto.RegisterRequest;
+import com.project.VaultNet.dto.AuthDto.*;
 import com.project.VaultNet.dto.TransactionDto.MoneyDepositRequest;
 import com.project.VaultNet.dto.TransactionDto.MoneyDepositResponse;
 import com.project.VaultNet.dto.cardPinDto.*;
@@ -12,6 +12,7 @@ import com.project.VaultNet.model.Users;
 import com.project.VaultNet.repository.DebitCardRepository;
 import com.project.VaultNet.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -200,6 +201,39 @@ public class UserService {
                     return new AccountCreationResponse(true, "Account successfully created");
                 })
                 .orElseGet(() -> new AccountCreationResponse(false, "Invalid email address: " + request.getEmail()));
+    }
+
+    public ForgotPasswordResponse sendOtpPassword(ForgotPasswordRequest request) {
+        Users user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()-> new RuntimeException("Invalid Email"));
+
+        String otp = String.valueOf(new Random().nextInt(999999));
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
+
+        user.setResetOtp(otp);
+        user.setResetOtpExpiresAt(expiry);
+        userRepository.save(user);
+
+        emailServiceImp.sendOtpEmail(request.getEmail(), otp,user.getFirstName());
+        return new ForgotPasswordResponse(true,"OTP sent your email address");
+    }
+
+    public ResetPasswordResponse resetPassword(ResetPasswordRequest request) {
+        Users user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()-> new RuntimeException("Invalid Email"));
+
+        if(!user.getResetOtp().equals(request.getOtp())){
+            return new ResetPasswordResponse(false,"Invalid Otp!");
+        }
+        if (user.getResetOtpExpiresAt().isBefore(LocalDateTime.now())) {
+            return new ResetPasswordResponse(false,"Otp Expires!");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetOtp(null);
+        user.setResetOtpExpiresAt(null);
+        userRepository.save(user);
+        return new ResetPasswordResponse(true, "Password Change Successfully!");
     }
 }
 
