@@ -42,12 +42,6 @@ public class Users {
 
     private Date createdAt;
 
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
-    private List<Transaction> sentTransactions;
-
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
-    private List<Transaction> receivedTransactions;
-
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private DebitCard debitCard;
 

@@ -3,6 +3,7 @@ package com.project.VaultNet.controller;
 import com.project.VaultNet.dto.AuthDto.AuthRequest;
 import com.project.VaultNet.dto.AuthDto.RegisterRequest;
 import com.project.VaultNet.dto.AuthDto.RegisterResponse;
+import com.project.VaultNet.model.Role;
 import com.project.VaultNet.model.Users;
 import com.project.VaultNet.service.DebitCardService;
 import com.project.VaultNet.service.JwtService;
@@ -100,7 +101,7 @@ public class AuthController {
                         .body("Invalid or expired token.");
             }
 
-            if ("CUSTOMER".equals(user.getRole())) {
+            if (user.getRole() == Role.CUSTOMER) {
                 debitCardService.sendVirtualCardEmail(
                         user.getEmail(),
                         user.getFullName(),

@@ -5,10 +5,15 @@ import com.project.VaultNet.dto.TransactionDto.TransferByAccountNumResponse;
 import com.project.VaultNet.dto.TransactionDto.TransferViaCardRequest;
 import com.project.VaultNet.dto.TransactionDto.TransferViaCardResponse;
 import com.project.VaultNet.dto.cardPinDto.*;
+import com.project.VaultNet.model.Transaction;
 import com.project.VaultNet.service.TransactionService;
 import com.project.VaultNet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/customer")
@@ -36,8 +41,13 @@ public class UserController {
     }
 
     @PostMapping("/forgot-pin")
-    public ForgotPinResponse getSendOtp(@RequestBody ForgotPinRequest request){
+    public ForgotPinResponse sendForgotPinOtp(@RequestBody ForgotPinRequest request){
         return userService.sendOtp(request);
+    }
+
+    @PostMapping("/verify-pin-otp")
+    public VerifyPinOtpResponse verifyOtpPin(@RequestBody VerifyPinOtpRequest request){
+        return userService.verifyOtpPin(request);
     }
 
     @PostMapping("/transfer-account")
@@ -48,5 +58,11 @@ public class UserController {
     @PostMapping("/transfer-card")
     public TransferViaCardResponse transferMoney(@RequestBody TransferViaCardRequest request) {
         return transactionService.transferUsingCardDetails(request);
+    }
+
+    @GetMapping("/users/{userId}/transactions")
+    public ResponseEntity<List<Transaction>> getUserTransactions(@PathVariable UUID userId) {
+        List<Transaction> transactions = transactionService.getUserTransactions(userId);
+        return ResponseEntity.ok(transactions);
     }
 }

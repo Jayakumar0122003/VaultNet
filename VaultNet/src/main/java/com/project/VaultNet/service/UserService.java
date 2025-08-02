@@ -141,5 +141,32 @@ public class UserService {
 
         return generic;
     }
+
+    public VerifyPinOtpResponse verifyOtpPin(VerifyPinOtpRequest request) {
+        Optional<DebitCard> debitCardOptional = debitCardRepository.findByOtp(request.getOtp());
+
+        if (debitCardOptional.isEmpty()) {
+            return new VerifyPinOtpResponse(false,"Invalid OTP");
+        }
+
+        DebitCard debitCard = debitCardOptional.get();
+
+        // Step 2: Check if OTP is expired
+        if (debitCard.getOtpExpiresAt().isBefore(LocalDateTime.now())) {
+            return new VerifyPinOtpResponse(false,"OTP expired");
+        }
+
+        // Step 3: Encode new PIN and update
+        String hashedPin = passwordEncoder.encode(request.getNewPin());
+        debitCard.setPinHash(hashedPin);
+
+        // Step 4: Clear OTP and save
+        debitCard.setOtp(null);
+        debitCard.setOtpExpiresAt(null);
+        debitCardRepository.save(debitCard);
+
+        return new VerifyPinOtpResponse(true,"PIN set successfully");
+
+    }
 }
 
