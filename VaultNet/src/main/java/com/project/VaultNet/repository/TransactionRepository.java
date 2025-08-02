@@ -11,6 +11,6 @@ import java.util.UUID;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findAllBySender_User_IdOrReceiver_User_Id(UUID senderUserId, UUID receiverUserId);
+    List<Transaction> findAllBySender_User_IdOrReceiver_User_Id(Long senderUserId, Long receiverUserId);
 }
 

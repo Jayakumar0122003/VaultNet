@@ -3,7 +3,9 @@ package com.project.VaultNet.service;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import com.project.VaultNet.model.DebitCard;
+import com.project.VaultNet.model.Users;
 import com.project.VaultNet.repository.DebitCardRepository;
+import com.project.VaultNet.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -29,6 +31,9 @@ public class DebitCardService {
         this.debitCardRepository = debitCardRepository;
     }
 
+    @Autowired
+    UserRepository userRepository;
+
     public void sendVirtualCardEmail(String email, String fullName, String phone) {
         try {
             // Generate password for PDF encryption
@@ -41,6 +46,8 @@ public class DebitCardService {
             String cvv = generateCVV();
             String expiry = generateExpiryDate();
 
+            Users user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+
             // Save card to DB
             DebitCard card = new DebitCard();
             card.setCardHolderName(fullName);
@@ -51,6 +58,7 @@ public class DebitCardService {
             card.setEmail(email);
             card.setPhone(phone);
             card.setIssuedAt(LocalDateTime.now());
+            card.setUser(user);
             debitCardRepository.save(card);
 
             // Create encrypted PDF

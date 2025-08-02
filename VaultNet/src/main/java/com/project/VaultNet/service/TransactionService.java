@@ -1,9 +1,6 @@
 package com.project.VaultNet.service;
 
-import com.project.VaultNet.dto.TransactionDto.TransferByAccountNumRequest;
-import com.project.VaultNet.dto.TransactionDto.TransferByAccountNumResponse;
-import com.project.VaultNet.dto.TransactionDto.TransferViaCardRequest;
-import com.project.VaultNet.dto.TransactionDto.TransferViaCardResponse;
+import com.project.VaultNet.dto.TransactionDto.*;
 import com.project.VaultNet.model.DebitCard;
 import com.project.VaultNet.model.Transaction;
 import com.project.VaultNet.repository.DebitCardRepository;
@@ -164,7 +161,7 @@ public class TransactionService {
     // Handle Failed Attempt
     // ====================================
     private void handleFailedAttempt(DebitCard card) {
-        int maxAttempts = 3;
+        int maxAttempts = 5;
 
         card.setFailedAttempts(card.getFailedAttempts() + 1);
         if (card.getFailedAttempts() >= maxAttempts) {
@@ -212,8 +209,61 @@ public class TransactionService {
         }
     }
 
-    public List<Transaction> getUserTransactions(UUID userId) {
+    public List<Transaction> getUserTransactions(Long userId) {
         return transactionRepository.findAllBySender_User_IdOrReceiver_User_Id(userId, userId);
     }
 
+    public MoneyDepositResponse depositMoney(MoneyDepositRequest request) {
+        DebitCard card = debitCardRepository.findByAccountNumber(request.getAccountNumber())
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+        card.setBalance(card.getBalance().add(request.getAmount()));
+        debitCardRepository.save(card);
+
+        Transaction creditTxn = new Transaction();
+        creditTxn.setAmount(request.getAmount());
+        creditTxn.setTimestamp(LocalDateTime.now());
+        creditTxn.setType("CREDIT");
+        creditTxn.setDescription("Money Deposited From You");
+        creditTxn.setSender(card);
+        creditTxn.setReceiver(card);
+        transactionRepository.save(creditTxn);
+
+        return new MoneyDepositResponse(true,"Successfully Deposited!");
+    }
+
+    public MoneyWithdrawResponse withdrawMoney(MoneyWithdrawRequest request) {
+        DebitCard card = debitCardRepository.findByAccountNumber(request.getAccountNumber())
+                .orElseThrow(() ->  new RuntimeException("Invalid Account Number"));
+
+        if (card.isCardBlocked()) {
+            return new MoneyWithdrawResponse(false,"Card is blocked due to multiple failed attempts. Contact support.");
+        }
+
+        if (!passwordEncoder.matches(request.getPin(), card.getPinHash())) {
+            handleFailedAttempt(card);
+            return new MoneyWithdrawResponse(false, "Invalid Pin");
+        }
+
+        if (card.getBalance().compareTo(request.getAmount()) < 0) {
+            return new MoneyWithdrawResponse(false,"Insufficient balance.");
+        }
+
+        // Limit check
+        validateTransactionLimit(card, request.getAmount());
+
+
+        card.setBalance(card.getBalance().subtract(request.getAmount()));
+        debitCardRepository.save(card);
+
+        Transaction debitTxn = new Transaction();
+        debitTxn.setAmount(request.getAmount());
+        debitTxn.setTimestamp(LocalDateTime.now());
+        debitTxn.setType("DEBIT");
+        debitTxn.setDescription("Money Withdraw From You");
+        debitTxn.setSender(card);
+        debitTxn.setReceiver(card);
+        transactionRepository.save(debitTxn);
+        return new MoneyWithdrawResponse(true, "Money Withdraw Successful");
+    }
 }

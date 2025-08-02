@@ -3,6 +3,8 @@ package com.project.VaultNet.service;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
 import com.project.VaultNet.dto.AuthDto.RegisterRequest;
+import com.project.VaultNet.dto.TransactionDto.MoneyDepositRequest;
+import com.project.VaultNet.dto.TransactionDto.MoneyDepositResponse;
 import com.project.VaultNet.dto.cardPinDto.*;
 import com.project.VaultNet.model.Address;
 import com.project.VaultNet.model.DebitCard;

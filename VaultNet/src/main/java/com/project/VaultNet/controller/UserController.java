@@ -2,10 +2,7 @@ package com.project.VaultNet.controller;
 
 import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
-import com.project.VaultNet.dto.TransactionDto.TransferByAccountNumRequest;
-import com.project.VaultNet.dto.TransactionDto.TransferByAccountNumResponse;
-import com.project.VaultNet.dto.TransactionDto.TransferViaCardRequest;
-import com.project.VaultNet.dto.TransactionDto.TransferViaCardResponse;
+import com.project.VaultNet.dto.TransactionDto.*;
 import com.project.VaultNet.dto.cardPinDto.*;
 import com.project.VaultNet.model.Role;
 import com.project.VaultNet.model.Transaction;
@@ -70,9 +67,24 @@ public class UserController {
     }
 
     @GetMapping("/users/{userId}/transactions")
-    public ResponseEntity<List<Transaction>> getUserTransactions(@PathVariable UUID userId) {
-        List<Transaction> transactions = transactionService.getUserTransactions(userId);
-        return ResponseEntity.ok(transactions);
+    public ResponseEntity<?> getUserTransactions(@PathVariable Long userId) {
+        try {
+            List<Transaction> transactions = transactionService.getUserTransactions(userId);
+            return ResponseEntity.ok(transactions);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid UUID: " + userId);
+        }
+    }
+
+
+    @PostMapping("/deposit-money")
+    public MoneyDepositResponse depositMoney(@RequestBody MoneyDepositRequest request){
+        return transactionService.depositMoney(request);
+    }
+
+    @PostMapping("/withdraw-money")
+    public MoneyWithdrawResponse withdrawMoney(@RequestBody MoneyWithdrawRequest request){
+        return transactionService.withdrawMoney(request);
     }
 
     @GetMapping("/verify")
