@@ -50,8 +50,7 @@ public class AuthController {
                 newUser.getId(),
                 newUser.getUsername(),
                 newUser.getEmail(),
-                newUser.getRole(),
-                newUser.getFullName()
+                newUser.getRole()
         );
 
         return ResponseEntity.ok(response);
@@ -101,13 +100,13 @@ public class AuthController {
                         .body("Invalid or expired token.");
             }
 
-            if (user.getRole() == Role.CUSTOMER) {
-                debitCardService.sendVirtualCardEmail(
-                        user.getEmail(),
-                        user.getFullName(),
-                        user.getPhone()
-                );
-            }
+//            if (user.getRole() == Role.CUSTOMER) {
+//                debitCardService.sendVirtualCardEmail(
+//                        user.getEmail(),
+//                        user.getFullName(),
+//                        user.getPhone()
+//                );
+//            }
 
             return ResponseEntity.ok("Email verified successfully. You can now log in.");
         } catch (Exception e) {

@@ -53,13 +53,11 @@ public class UserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
-                .fullName(request.getFullName())
-                .phone(request.getPhone())
                 .verificationToken(token)
                 .build();
-        String verificationLink = "http://localhost:8080/api/auth/verify?token=" + token;
+//        String verificationLink = "http://localhost:8080/api/auth/verify?token=" + token;
 
-        emailServiceImp.sendVerificationEmail(user.getEmail(), verificationLink, user.getFullName());
+//        emailServiceImp.sendVerificationEmail(user.getEmail(), verificationLink, user.getFullName());
 
         return userRepository.save(user);
     }

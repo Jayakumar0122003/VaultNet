@@ -2,6 +2,8 @@ package com.project.VaultNet.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -11,6 +13,7 @@ import java.util.*;
 @Builder
 @Table(name = "users")
 public class Users {
+    //REGISTRATION FIELDS
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -22,20 +25,33 @@ public class Users {
     @Column(nullable = false, unique = true)
     private String username;
 
-    private String fullName;
-
-    private String phone;
-
+    @Column(nullable = false)
     private String password;
-
-    private String signinCode;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private Role role;
+//    ----------------------------------------------------------------------------
+
+    // ACCOUNT CREATION FIELDS, AND EMAIL USED ABOVE REGISTRATION FIELD
+
+    private String firstName;
+
+    private String lastName;
+
+    private String phone;
+
+    @Embedded
+    private Address address;
+
+    @Column(name = "dob", nullable = false)
+    private LocalDate dob;
 
     @Column(name = "email_verified")
     private boolean emailVerified = false;
+
+    @Column(name = "account_created")
+    private boolean account_created = false;
 
     @Column(name = "verification_token")
     private String verificationToken;
@@ -44,5 +60,4 @@ public class Users {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private DebitCard debitCard;
-
 }
