@@ -6,13 +6,16 @@ import com.project.VaultNet.dto.cardPinDto.ChangePinResponse;
 import com.project.VaultNet.dto.cardPinDto.SetPinRequest;
 import com.project.VaultNet.dto.cardPinDto.SetPinResponse;
 import com.project.VaultNet.model.DebitCard;
+import com.project.VaultNet.model.Transaction;
 import com.project.VaultNet.model.Users;
 import com.project.VaultNet.repository.DebitCardRepository;
+import com.project.VaultNet.repository.TransactionRepository;
 import com.project.VaultNet.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;

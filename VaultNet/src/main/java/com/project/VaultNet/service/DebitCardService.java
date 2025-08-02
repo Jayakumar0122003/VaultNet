@@ -131,4 +131,19 @@ public class DebitCardService {
         LocalDateTime expiry = now.plusYears(3);
         return expiry.format(DateTimeFormatter.ofPattern("MM/yy"));
     }
+
+    public DebitCard unblockCard(String cardNumber) {
+        DebitCard card = debitCardRepository.findByCardNumber(cardNumber)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+        if (!card.isCardBlocked()) {
+            throw new RuntimeException("Card is not blocked.");
+        }
+
+        card.setCardBlocked(false);
+        card.setOtp(null);        // Optional: clear OTP state
+        card.setOtpExpiresAt(null);   // Optional: clear OTP expiration
+        return debitCardRepository.save(card);
+    }
+
 }

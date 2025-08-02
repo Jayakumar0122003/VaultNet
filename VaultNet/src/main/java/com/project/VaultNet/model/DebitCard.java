@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "debit_card")
@@ -54,8 +56,8 @@ public class DebitCard {
     private boolean pinSet = false;
 
     // OTP storage (hashed) and expiration
-    @Column(name = "otp_hash", length = 60)
-    private String otpHash;
+    @Column(name = "otp", length = 60)
+    private String otp;
 
     private LocalDateTime otpExpiresAt;
 
@@ -71,6 +73,17 @@ public class DebitCard {
 
     @Column(name = "blocked_at")
     private LocalDateTime blockedAt;
+
+
+    private BigDecimal dailyTransactionLimit = new BigDecimal("50000"); // default 50,000 INR
+    private BigDecimal todayTransactionTotal = BigDecimal.ZERO;
+    private LocalDate lastTransactionDate;
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+    private List<Transaction> sentTransactions;
+
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+    private List<Transaction> receivedTransactions;
 
 
 
