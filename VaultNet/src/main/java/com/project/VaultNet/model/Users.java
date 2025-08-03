@@ -68,4 +68,7 @@ public class Users {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private DebitCard debitCard;
+
+    @OneToOne(mappedBy = "userTicket", cascade = CascadeType.ALL)
+    private SupportTicket supportTicket;
 }
