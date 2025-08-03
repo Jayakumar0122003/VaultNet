@@ -9,5 +9,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class GetAllTicketsByUserResponse {
+    private String message;
     List<SupportTicket> ticket;
 }

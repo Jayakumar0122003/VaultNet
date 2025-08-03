@@ -1,8 +1,11 @@
 package com.project.VaultNet.controller;
 
+import com.project.VaultNet.dto.Support.admin.CloseRequestResponse;
+import com.project.VaultNet.dto.Support.admin.SupportTicketResponse;
 import com.project.VaultNet.model.DebitCard;
 import com.project.VaultNet.repository.DebitCardRepository;
 import com.project.VaultNet.service.DebitCardService;
+import com.project.VaultNet.service.SupportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +27,9 @@ public class AdminController {
     @Autowired
     private DebitCardRepository debitCardRepository;
 
+    @Autowired
+    private SupportService supportService;
+
     @GetMapping("/blocked-cards")
     public ResponseEntity<List<DebitCard>> getBlockedCards() {
         List<DebitCard> blocked = debitCardRepository.findAllByCardBlockedTrue();
@@ -40,5 +46,15 @@ public class AdminController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/users-tickets")
+    public List<SupportTicketResponse> getAllTicketsForAdmin() {
+        return supportService.getAllTicketsForAdmin();
+    }
+
+    @PutMapping("/close-ticket/{ticketId}")
+    public CloseRequestResponse closeTicket(@PathVariable Long ticketId){
+        return supportService.closeSupportTicket(ticketId);
     }
 }

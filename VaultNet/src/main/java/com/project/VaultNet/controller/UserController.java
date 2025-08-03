@@ -10,6 +10,7 @@ import com.project.VaultNet.dto.details.DebitCardDetailsRequest;
 import com.project.VaultNet.model.Role;
 import com.project.VaultNet.model.Transaction;
 import com.project.VaultNet.model.Users;
+import com.project.VaultNet.repository.UserRepository;
 import com.project.VaultNet.service.DebitCardService;
 import com.project.VaultNet.service.TransactionService;
 import com.project.VaultNet.service.UserService;
@@ -18,6 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +37,9 @@ public class UserController {
 
     @Autowired
     DebitCardService debitCardService;
+
+    @Autowired
+    UserRepository userRepository;
 
     @GetMapping("/greet")
     public String userGreet(){
@@ -69,14 +76,46 @@ public class UserController {
         return transactionService.transferUsingCardDetails(request);
     }
 
-    @GetMapping("/users/{userId}/transactions")
-    public ResponseEntity<?> getUserTransactions(@PathVariable Long userId) {
+    @GetMapping("/user/{userId}/transactions")
+    public ResponseEntity<?> getUserTransactions(@PathVariable Long userId, Principal principal) {
         try {
-            List<Transaction> transactions = transactionService.getUserTransactions(userId);
+            Users currentUser = userRepository.findByEmail(principal.getName())
+                    .orElseThrow(() -> new RuntimeException("Unauthorized"));
+
+            if(!currentUser.getId().equals(userId)){
+                return ResponseEntity.badRequest().body("Access Denied");
+
+            }
+            List<Transaction> transactions = transactionService.getAllTransactionsForUser(userId);
             return ResponseEntity.ok(transactions);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid UUID: " + userId);
         }
+    }
+
+    @GetMapping("/user/{userId}/debit")
+    public ResponseEntity<List<Transaction>> getDebitTransactions(@PathVariable Long userId, Principal principal) {
+        Users currentUser = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("Unauthorized"));
+
+        if(!currentUser.getId().equals(userId)){
+            throw new RuntimeException("Access Denied!");
+
+        }
+        return ResponseEntity.ok(transactionService.getDebitTransactions(userId));
+    }
+
+    // Only credit transactions
+    @GetMapping("/user/{userId}/credit")
+    public ResponseEntity<List<Transaction>> getCreditTransactions(@PathVariable Long userId, Principal principal) {
+        Users currentUser = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("Unauthorized"));
+
+        if(!currentUser.getId().equals(userId)){
+            throw new RuntimeException("Access Denied!");
+
+        }
+        return ResponseEntity.ok(transactionService.getCreditTransactions(userId));
     }
 
 

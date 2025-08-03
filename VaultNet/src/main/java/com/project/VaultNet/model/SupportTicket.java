@@ -1,5 +1,6 @@
 package com.project.VaultNet.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,6 +19,7 @@ public class SupportTicket {
     private Long id;
 
     private String email;
+    private String username;
     private String subject;
 
     @Column(length = 2000)
@@ -28,5 +30,6 @@ public class SupportTicket {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonBackReference
     private Users userTicket;
 }

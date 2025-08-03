@@ -1,5 +1,6 @@
 package com.project.VaultNet.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,9 +29,12 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "sender_id")
+    @JsonBackReference(value = "sent")
     private DebitCard sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver_id")
+    @JsonBackReference(value = "received")
     private DebitCard receiver;
+
 }

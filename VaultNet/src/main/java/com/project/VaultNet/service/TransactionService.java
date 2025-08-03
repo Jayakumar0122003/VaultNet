@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +41,7 @@ public class TransactionService {
 
         // Block check
         if (senderCard.isCardBlocked()) {
-            return new TransferByAccountNumResponse(false,"Card is blocked due to multiple failed attempts. Contact support.");
+            return new TransferByAccountNumResponse(false, "Card is blocked due to multiple failed attempts. Contact support.");
         }
 
         // Limit check
@@ -52,12 +50,12 @@ public class TransactionService {
         // PIN check
         if (!passwordEncoder.matches(request.getPin(), senderCard.getPinHash())) {
             handleFailedAttempt(senderCard);
-            return new TransferByAccountNumResponse(false,"Invalid PIN.");
+            return new TransferByAccountNumResponse(false, "Invalid PIN.");
         }
 
         // Balance check
         if (senderCard.getBalance().doubleValue() < request.getAmount()) {
-            return new TransferByAccountNumResponse(false,"Insufficient balance.");
+            return new TransferByAccountNumResponse(false, "Insufficient balance.");
         }
 
         // Perform transfer
@@ -87,7 +85,7 @@ public class TransactionService {
         creditTxn.setReceiver(receiverCard);
         transactionRepository.save(creditTxn);
 
-        return new TransferByAccountNumResponse(true,"Transfer successful.");
+        return new TransferByAccountNumResponse(true, "Transfer successful.");
     }
 
     // ====================================
@@ -98,7 +96,7 @@ public class TransactionService {
                 .orElseThrow(() -> new RuntimeException("Card not found"));
 
         if (senderCard.isCardBlocked()) {
-            return new TransferViaCardResponse(false,"Card is blocked due to multiple failed attempts. Contact support.");
+            return new TransferViaCardResponse(false, "Card is blocked due to multiple failed attempts. Contact support.");
         }
 
         // Validate card details
@@ -106,18 +104,18 @@ public class TransactionService {
                 || !senderCard.getCvv().equals(request.getCvv())
                 || !senderCard.getExpiryDate().equals(request.getExpiryDate())) {
             handleFailedAttempt(senderCard);
-            return new TransferViaCardResponse(false,"Card details are incorrect.");
+            return new TransferViaCardResponse(false, "Card details are incorrect.");
         }
 
         // PIN check
         if (!passwordEncoder.matches(request.getPin(), senderCard.getPinHash())) {
             handleFailedAttempt(senderCard);
-            return new TransferViaCardResponse(false,"Invalid PIN.");
+            return new TransferViaCardResponse(false, "Invalid PIN.");
         }
 
         // Balance check
         if (senderCard.getBalance().doubleValue() < request.getAmount()) {
-            return new TransferViaCardResponse(false,"Insufficient balance.");
+            return new TransferViaCardResponse(false, "Insufficient balance.");
         }
 
         // Limit check
@@ -154,7 +152,7 @@ public class TransactionService {
         creditTxn.setReceiver(receiverCard);
         transactionRepository.save(creditTxn);
 
-        return new TransferViaCardResponse(true,"Transfer via card successful.");
+        return new TransferViaCardResponse(true, "Transfer via card successful.");
     }
 
     // ====================================
@@ -209,10 +207,6 @@ public class TransactionService {
         }
     }
 
-    public List<Transaction> getUserTransactions(Long userId) {
-        return transactionRepository.findAllBySender_User_IdOrReceiver_User_Id(userId, userId);
-    }
-
     public MoneyDepositResponse depositMoney(MoneyDepositRequest request) {
         DebitCard card = debitCardRepository.findByAccountNumber(request.getAccountNumber())
                 .orElseThrow(() -> new RuntimeException("Card not found"));
@@ -229,15 +223,15 @@ public class TransactionService {
         creditTxn.setReceiver(card);
         transactionRepository.save(creditTxn);
 
-        return new MoneyDepositResponse(true,"Successfully Deposited!");
+        return new MoneyDepositResponse(true, "Successfully Deposited!");
     }
 
     public MoneyWithdrawResponse withdrawMoney(MoneyWithdrawRequest request) {
         DebitCard card = debitCardRepository.findByAccountNumber(request.getAccountNumber())
-                .orElseThrow(() ->  new RuntimeException("Invalid Account Number"));
+                .orElseThrow(() -> new RuntimeException("Invalid Account Number"));
 
         if (card.isCardBlocked()) {
-            return new MoneyWithdrawResponse(false,"Card is blocked due to multiple failed attempts. Contact support.");
+            return new MoneyWithdrawResponse(false, "Card is blocked due to multiple failed attempts. Contact support.");
         }
 
         if (!passwordEncoder.matches(request.getPin(), card.getPinHash())) {
@@ -246,7 +240,7 @@ public class TransactionService {
         }
 
         if (card.getBalance().compareTo(request.getAmount()) < 0) {
-            return new MoneyWithdrawResponse(false,"Insufficient balance.");
+            return new MoneyWithdrawResponse(false, "Insufficient balance.");
         }
 
         // Limit check
@@ -265,5 +259,17 @@ public class TransactionService {
         debitTxn.setReceiver(card);
         transactionRepository.save(debitTxn);
         return new MoneyWithdrawResponse(true, "Money Withdraw Successful");
+    }
+
+    public List<Transaction> getDebitTransactions(Long userId) {
+        return transactionRepository.findBySenderIdAndType(userId, "DEBIT");
+    }
+
+    public List<Transaction> getCreditTransactions(Long userId) {
+        return transactionRepository.findByReceiverIdAndType(userId, "CREDIT");
+    }
+
+    public List<Transaction> getAllTransactionsForUser(Long userId) {
+        return transactionRepository.findBySenderIdOrReceiverId(userId, userId);
     }
 }

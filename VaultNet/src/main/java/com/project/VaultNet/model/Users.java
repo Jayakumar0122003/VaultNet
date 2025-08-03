@@ -1,5 +1,6 @@
 package com.project.VaultNet.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -67,8 +68,11 @@ public class Users {
 
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private DebitCard debitCard;
 
-    @OneToOne(mappedBy = "userTicket", cascade = CascadeType.ALL)
-    private SupportTicket supportTicket;
+    @OneToMany(mappedBy = "userTicket", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<SupportTicket> supportTickets = new ArrayList<>();
+
 }

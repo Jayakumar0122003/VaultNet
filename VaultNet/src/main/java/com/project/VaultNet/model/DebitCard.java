@@ -1,5 +1,7 @@
 package com.project.VaultNet.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -63,6 +65,7 @@ public class DebitCard {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonBackReference
     private Users user;
 
     @Column(name = "failed_attempts")
@@ -79,11 +82,14 @@ public class DebitCard {
     private BigDecimal todayTransactionTotal = BigDecimal.ZERO;
     private LocalDate lastTransactionDate;
 
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sender")
+    @JsonManagedReference(value = "sent")
     private List<Transaction> sentTransactions;
 
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "receiver")
+    @JsonManagedReference(value = "received")
     private List<Transaction> receivedTransactions;
+    ;
 
 
 
