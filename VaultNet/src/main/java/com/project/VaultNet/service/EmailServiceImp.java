@@ -94,5 +94,57 @@ public class EmailServiceImp implements EmailService {
         }
     }
 
+    @Override
+    public void sendOtpNumChange(String toEmail, String otp, String name) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+
+            Context context = new Context();
+            context.setVariable("name", name);
+            context.setVariable("otp", otp);
+
+            // Template name: phone-change-otp.html (in templates folder)
+            String htmlContent = templateEngine.process("phone-change-otp", context);
+
+            helper.setTo(toEmail);
+            helper.setSubject("Verify Phone Number Change - VaultNet");
+            helper.setFrom(fromEmail);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send OTP email for phone change", e);
+        }
+    }
+    @Override
+    public void sendOtpAddressChange(String toEmail, String otp, String name) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+
+            Context context = new Context();
+            context.setVariable("name", name);
+            context.setVariable("otp", otp);
+
+            // Template name: address-change-otp.html (in templates folder)
+            String htmlContent = templateEngine.process("address-change-otp", context);
+
+            helper.setTo(toEmail);
+            helper.setSubject("Verify Address Change - VaultNet");
+            helper.setFrom(fromEmail);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send OTP email for address change", e);
+        }
+    }
+
+
 
 }

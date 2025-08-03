@@ -3,6 +3,7 @@ package com.project.VaultNet.service;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
 import com.project.VaultNet.dto.AuthDto.*;
+import com.project.VaultNet.dto.ChangeEmail.*;
 import com.project.VaultNet.dto.TransactionDto.MoneyDepositRequest;
 import com.project.VaultNet.dto.TransactionDto.MoneyDepositResponse;
 import com.project.VaultNet.dto.cardPinDto.*;
@@ -11,15 +12,19 @@ import com.project.VaultNet.dto.details.DebitCardDetails;
 import com.project.VaultNet.dto.details.DebitCardDetailsRequest;
 import com.project.VaultNet.model.Address;
 import com.project.VaultNet.model.DebitCard;
+import com.project.VaultNet.model.SupportTicket;
 import com.project.VaultNet.model.Users;
 import com.project.VaultNet.repository.DebitCardRepository;
+import com.project.VaultNet.repository.SupportTicketRepository;
 import com.project.VaultNet.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -38,6 +43,9 @@ public class UserService {
 
     @Autowired
     DebitCardRepository debitCardRepository;
+
+    @Autowired
+    SupportTicketRepository supportTicketRepository;
 
     private final Random random = new Random();
 
@@ -274,6 +282,94 @@ public class UserService {
         user.setResetOtpExpiresAt(null);
         userRepository.save(user);
         return new ResetPasswordResponse(true, "Password Change Successfully!");
+    }
+
+    public ChangeEmailResponse changeEmail(ChangeEmailRequest request) {
+        Users user = userRepository.findByPhoneEndingWith(request.getLastFourDigits()).orElseThrow(()-> new RuntimeException("Invalid Digits!"));
+        DebitCard debitCard = debitCardRepository.findByPhoneEndingWith(request.getLastFourDigits()).orElseThrow(()-> new RuntimeException("Invalid Digits!"));
+        List<SupportTicket> supportTicketList = supportTicketRepository.findByUserTicket_Id(user.getId());
+
+        debitCard.setEmail(request.getEmail());
+        user.setEmail(request.getEmail());
+
+        for (SupportTicket ticket : supportTicketList) {
+            ticket.setEmail(request.getEmail()); // assuming SupportTicket has `setEmail()`
+        }
+
+
+        userRepository.save(user);
+        debitCardRepository.save(debitCard);
+        supportTicketRepository.saveAll(supportTicketList);
+
+        return new ChangeEmailResponse("Email updated successfully", true);
+    }
+
+
+    public GenericResponse initiatePhoneChange(ChangePhoneRequest request) {
+        Users user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        String otp = String.valueOf(new Random().nextInt(999999));
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
+
+        user.setResetOtp(otp);
+        user.setResetOtpExpiresAt(expiry);
+        userRepository.save(user);
+
+        emailServiceImp.sendOtpNumChange(request.getEmail(), otp,user.getFirstName());
+        return new GenericResponse("OTP sent to email", true);
+    }
+
+    public GenericResponse verifyOtpAndUpdatePhone(VerifyOtpRequest request, Principal principal) {
+        Users users = userRepository.findByEmail(principal.getName()).orElseThrow(()-> new RuntimeException("Invalid user!"));
+        if (!users.getResetOtp().equals(request.getOtp())) {
+            return new GenericResponse("Invalid or expired OTP", false);
+        }
+
+        if (users.getResetOtpExpiresAt().isBefore(LocalDateTime.now())) {
+            return new GenericResponse("OTP expired",false);
+        }
+        users.setPhone(request.getNewPhoneNumber());
+        users.setResetOtp(null);
+        users.setResetOtpExpiresAt(null);
+        userRepository.save(users);
+        return new GenericResponse("Phone Number Successfully Changed!", true);
+    }
+
+    public GenericResponse changeAddressRequest(AddressChangeOtpRequest request) {
+        Users user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()-> new RuntimeException("Invalid Email Address"));
+        String otp = String.valueOf(new Random().nextInt(999999));
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
+
+        user.setResetOtp(otp);
+        user.setResetOtpExpiresAt(expiry);
+        userRepository.save(user);
+        emailServiceImp.sendOtpAddressChange(user.getEmail(), otp, user.getFirstName());
+        return new GenericResponse("Otp send successful",true);
+    }
+
+    public GenericResponse verifyOtpAndUpdateAddress(AddressChangeRequest request, Principal principal) {
+        Users user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(()-> new RuntimeException("Invalid user!"));
+
+        if (!user.getResetOtp().equals(request.getOtp())) {
+            return new GenericResponse("Invalid or expired OTP", false);
+        }
+
+        if (user.getResetOtpExpiresAt().isBefore(LocalDateTime.now())) {
+            return new GenericResponse("OTP expired",false);
+        }
+        Address address = new Address();
+        address.setAddressLine(request.getAddressLine());
+        address.setCity(request.getCity());
+        address.setState(request.getState());
+        address.setPostalCode(request.getPostalCode());
+        user.setAddress(address);
+        user.setResetOtpExpiresAt(null);
+        user.setResetOtp(null);
+        userRepository.save(user);
+        return new GenericResponse("Address Details successfully updated!",true);
     }
 }
 

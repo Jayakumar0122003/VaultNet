@@ -2,6 +2,7 @@ package com.project.VaultNet.controller;
 
 import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
+import com.project.VaultNet.dto.ChangeEmail.*;
 import com.project.VaultNet.dto.TransactionDto.*;
 import com.project.VaultNet.dto.cardPinDto.*;
 import com.project.VaultNet.dto.details.AccountDetails;
@@ -20,10 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/customer")
@@ -168,6 +166,32 @@ public class UserController {
     @PostMapping("/get-card-details")
     public DebitCardDetails getCardDetails(@RequestBody DebitCardDetailsRequest request){
         return userService.getCardDetails(request);
+    }
+
+    @PutMapping("/change-email")
+    public ResponseEntity<ChangeEmailResponse> changeEmail(
+            @RequestBody ChangeEmailRequest request) {
+        ChangeEmailResponse response = userService.changeEmail(request);
+        return ResponseEntity.ok(response);
+    }
+    @PutMapping("/change-phone")
+    public ResponseEntity<GenericResponse> changePhone(@RequestBody ChangePhoneRequest request) {
+        return ResponseEntity.ok(userService.initiatePhoneChange(request));
+    }
+
+    @PostMapping("/verify-otp-phone")
+    public ResponseEntity<GenericResponse> verifyOtp(@RequestBody VerifyOtpRequest request, Principal principal) {
+        return ResponseEntity.ok(userService.verifyOtpAndUpdatePhone(request,principal));
+    }
+
+    @PutMapping("/change-address")
+    public ResponseEntity<GenericResponse> changePhone(@RequestBody AddressChangeOtpRequest request) {
+        return ResponseEntity.ok(userService.changeAddressRequest(request));
+    }
+
+    @PostMapping("/verify-otp-address")
+    public ResponseEntity<GenericResponse> verifyOtp(@RequestBody AddressChangeRequest request, Principal principal) {
+        return ResponseEntity.ok(userService.verifyOtpAndUpdateAddress(request,principal));
     }
 
 }
