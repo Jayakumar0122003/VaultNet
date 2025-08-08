@@ -8,8 +8,8 @@
     --font-bitcount: "Bitcount Prop Single", "sans-serif";
     --font-poppins: "Poppins", "sans-serif";
     --font-playwrite: "Playwrite AU NSW", "sans-serif";
-    --color-sec: ;
-    --color-main: ;
+    --color-sec: #CEDDD9 ;
+    --color-main: #0A5840;
 }
 
 html {
