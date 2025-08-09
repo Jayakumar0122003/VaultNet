@@ -2,6 +2,7 @@ package com.project.VaultNet.service;
 
 import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
+import com.project.VaultNet.dto.AccountCreation.UserProfileDTO;
 import com.project.VaultNet.dto.AuthDto.*;
 import com.project.VaultNet.dto.ChangeEmail.*;
 import com.project.VaultNet.dto.TransactionDto.MoneyDepositRequest;
@@ -376,6 +377,24 @@ public class UserService {
             return  new ResponseVerifyOtp(false,"Otp expires!");
         }
         return new ResponseVerifyOtp(true, "Otp Verified Successful!");
+    }
+
+    public UserProfileDTO getAccount(Principal principal) {
+        Users user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return UserProfileDTO.builder()
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .role(user.getRole())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .phone(user.getPhone())
+                .address(user.getAddress())
+                .dob(user.getDob())
+                .emailVerified(user.isEmailVerified())
+                .accountCreated(user.isAccountCreated())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 }
 

@@ -2,6 +2,7 @@ package com.project.VaultNet.controller;
 
 import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
+import com.project.VaultNet.dto.AccountCreation.UserProfileDTO;
 import com.project.VaultNet.dto.ChangeEmail.*;
 import com.project.VaultNet.dto.TransactionDto.*;
 import com.project.VaultNet.dto.cardPinDto.*;
@@ -161,6 +162,11 @@ public class UserController {
     public AccountDetails getAccountDetails(
             @PathVariable("userId") Long userId) {
         return userService.getAccountDetails(userId);
+    }
+
+    @GetMapping("/get-account")
+    public UserProfileDTO getAccount(Principal principal){
+        return userService.getAccount(principal);
     }
 
     @PostMapping("/get-card-details")

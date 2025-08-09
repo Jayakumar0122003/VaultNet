@@ -6,10 +6,13 @@ import { RiMoneyRupeeCircleFill } from "react-icons/ri";
 import {toast} from "react-toastify"
 import axios from "axios"
 import {useNavigate} from "react-router-dom"
+import { useContext } from "react";
+import { AuthContext } from "../Components/Context/AuthContext"
+
 
 export default function AuthPageCreative() {
   const [isLogin, setIsLogin] = useState(true);
-
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -47,6 +50,8 @@ export default function AuthPageCreative() {
 
       console.log("Login Response:", response.data);
 
+      login(response.data.accessToken,response.data.role)
+      
       // Reset form
       setLoginData({ email: "", password: "" });
 
@@ -127,7 +132,7 @@ const handleSignupSubmit = async (e) => {
 };
 
   return (
-    <div className="h-screen flex flex-col lg:flex-row border-b-1 border-sec">
+    <div className="h-full lg:h-screen flex flex-col lg:flex-row border-b-1 border-sec">
       {/* Left Illustration */}
       <div className="lg:w-1/2 bg-main flex justify-center items-center p-8">
         <div className="text-center text-white ">
@@ -140,7 +145,7 @@ const handleSignupSubmit = async (e) => {
       </div>
 
       {/* Right Form Section */}
-      <div className="lg:w-1/2 flex justify-center items-center bg-gray-100 p-6 h-screen lg:h-full">
+      <div className="lg:w-1/2 flex justify-center items-center bg-gray-100 p-6 h-full lg:h-full">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
