@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { Landmark } from "lucide-react";
 import { BiSolidBank } from "react-icons/bi";
@@ -62,7 +63,7 @@ export default function AuthPageCreative() {
   };
 
   return (
-    <div className="h-full  flex flex-col lg:flex-row border-b-1 border-sec">
+    <div className="h-screen flex flex-col lg:flex-row border-b-1 border-sec">
       {/* Left Illustration */}
       <div className="lg:w-1/2 bg-main flex justify-center items-center p-8">
         <div className="text-center text-white ">
@@ -75,7 +76,7 @@ export default function AuthPageCreative() {
       </div>
 
       {/* Right Form Section */}
-      <div className="lg:w-1/2 flex justify-center items-center bg-gray-100 p-6">
+      <div className="lg:w-1/2 flex justify-center items-center bg-gray-100 p-6 h-screen lg:h-full">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -92,7 +93,7 @@ export default function AuthPageCreative() {
             "Secure, smart, and seamless banking — just for you."
           </p>
 
-          <label htmlFor="loginEmail" className="block text-gray-700 font-medium mb-1">
+          <label htmlFor="loginEmail" className="block text-gray-700 font-medium mb-1 lg:text-sm">
             Email Address
           </label>
           <input
@@ -106,7 +107,7 @@ export default function AuthPageCreative() {
             required
           />
 
-          <label htmlFor="loginPassword" className="block text-gray-700 font-medium mb-1">
+          <label htmlFor="loginPassword" className="block text-gray-700 font-medium mb-1 lg:text-sm">
             Password
           </label>
           <input
@@ -154,15 +155,15 @@ export default function AuthPageCreative() {
           </button>
         </form>
       ) : (
-            <form onSubmit={handleSignupSubmit} className="space-y-4">
-              <h2 className="text-2xl font-bold text-center text-main mb-2 flex gap-1 md:gap-2 justify-center">
-                <BiSolidBank className="w-7 h-7 md:w-8 md:h-8 pt-1 md:pt-0"/>Create Your Account
+            <form onSubmit={handleSignupSubmit} className="space-y-3">
+              <h2 className="text-2xl lg:text-xl font-bold text-center text-main mb-2 flex gap-1 md:gap-2 justify-center">
+                <BiSolidBank className="w-7 h-7 md:w-8 md:h-8 lg:w-7 lg:h-7 pt-1 md:pt-0"/>Create Your Account
               </h2>
-              <p className="text-center text-gray-600 mb-4 text-sm italic">
+              <p className="text-center text-gray-600 mb-4 text-sm lg:text-xs italic">
                 "Your journey to smart and secure banking starts here."
               </p>
 
-              <label htmlFor="fullName" className="block text-gray-700 font-medium mb-1">
+              <label htmlFor="fullName" className="block text-gray-700 font-medium lg:text-sm mb-0">
                 Full Name
               </label>
               <input
@@ -176,7 +177,7 @@ export default function AuthPageCreative() {
                 required
               />
 
-              <label htmlFor="signupEmail" className="block text-gray-700 font-medium mb-1">
+              <label htmlFor="signupEmail" className="block text-gray-700 font-medium mb-0 lg:text-sm">
                 Email Address
               </label>
               <input
@@ -190,7 +191,7 @@ export default function AuthPageCreative() {
                 required
               />
 
-              <label htmlFor="signupPassword" className="block text-gray-700 font-medium mb-1">
+              <label htmlFor="signupPassword" className="block text-gray-700 font-medium mb-0 lg:text-sm">
                 Password
               </label>
               <input
@@ -207,7 +208,7 @@ export default function AuthPageCreative() {
                 Password should be at least 8 characters, include an uppercase letter, number, and special character.
               </p>
 
-              <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-1">
+              <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-0 lg:text-sm">
                 Confirm Password
               </label>
               <input
