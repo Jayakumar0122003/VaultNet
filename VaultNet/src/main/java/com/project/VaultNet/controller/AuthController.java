@@ -93,6 +93,11 @@ public class AuthController {
         return userService.sendOtpPassword(request);
     }
 
+    @PostMapping("/verify-otp")
+    public ResponseVerifyOtp verifyOtp(@RequestBody VerifyOtp request){
+        return userService.verifyOtp(request);
+    }
+
     @PostMapping("/reset-password")
     public ResetPasswordResponse forgotPassword(@RequestBody ResetPasswordRequest request){
         return userService.resetPassword(request);

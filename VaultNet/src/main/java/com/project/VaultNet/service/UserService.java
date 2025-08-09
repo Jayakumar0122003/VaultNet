@@ -270,13 +270,6 @@ public class UserService {
         Users user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()-> new RuntimeException("Invalid Email"));
 
-        if(!user.getResetOtp().equals(request.getOtp())){
-            return new ResetPasswordResponse(false,"Invalid Otp!");
-        }
-        if (user.getResetOtpExpiresAt().isBefore(LocalDateTime.now())) {
-            return new ResetPasswordResponse(false,"Otp Expires!");
-        }
-
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setResetOtp(null);
         user.setResetOtpExpiresAt(null);
@@ -370,6 +363,19 @@ public class UserService {
         user.setResetOtp(null);
         userRepository.save(user);
         return new GenericResponse("Address Details successfully updated!",true);
+    }
+
+    public ResponseVerifyOtp verifyOtp(VerifyOtp request) {
+        Users user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if(!user.getResetOtp().equals(request.getOtp())){
+            return  new ResponseVerifyOtp(false,"Invalid Otp!");
+        }
+        if(!user.getResetOtpExpiresAt().isBefore(LocalDateTime.now())){
+            return  new ResponseVerifyOtp(false,"Otp expires!");
+        }
+        return new ResponseVerifyOtp(true, "Otp Verified Successful!");
     }
 }
 

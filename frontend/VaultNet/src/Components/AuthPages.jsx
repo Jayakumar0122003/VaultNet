@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-import { Landmark } from "lucide-react";
 import { BiSolidBank } from "react-icons/bi";
-import {TbWorldDollar} from "react-icons/tb"
-import {CiBadgeDollar} from 'react-icons/ci'
-import { GiReceiveMoney } from "react-icons/gi";
-import { FaMoneyBillWave } from "react-icons/fa";
 import { RiMoneyRupeeCircleFill } from "react-icons/ri";
+import {toast} from "react-toastify"
+import axios from "axios"
+import {useNavigate} from "react-router-dom"
 
 export default function AuthPageCreative() {
   const [isLogin, setIsLogin] = useState(true);
+
+  const navigate = useNavigate();
 
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
@@ -32,35 +32,99 @@ export default function AuthPageCreative() {
     setSignupData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLoginSubmit = (e) => {
-    e.preventDefault();
-    console.log("Login Data:", loginData);
-    setLoginData({ email: "", password: "" });
-  };
-
-  const handleSignupSubmit = (e) => {
+    const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
-    // Strong password validation
-    const strongPasswordRegex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    try {
+      // API request
+      const response = await axios.post("http://localhost:8080/api/auth/login", loginData);
 
-    if (!strongPasswordRegex.test(signupData.password)) {
-      alert(
-        "Password must be at least 8 characters, include an uppercase letter, a number, and a special character."
+      // Show success toast
+      toast.success("Login successful!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+
+      console.log("Login Response:", response.data);
+
+      // Reset form
+      setLoginData({ email: "", password: "" });
+
+      navigate("/")
+
+    } catch (error) {
+      // Show error toast
+      toast.error(
+        error.response?.data?.message || "Login failed. Please try again.",
+        {
+          position: "top-right",
+          autoClose: 3000,
+        }
       );
-      return;
+      console.error("Login Error:", error);
     }
-
-    // Confirm password check
-    if (signupData.password !== signupData.confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-
-    console.log("Signup Data:", signupData);
-    setSignupData({ fullName: "", email: "", password: "", confirmPassword: "" });
   };
+
+
+const handleSignupSubmit = async (e) => {
+  e.preventDefault();
+
+  // Strong password validation
+  const strongPasswordRegex =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  if (!strongPasswordRegex.test(signupData.password)) {
+    toast.error(
+      "Password must be at least 8 characters, include an uppercase letter, a number, and a special character.",
+      { position: "top-right", autoClose: 3000 }
+    );
+    return;
+  }
+
+  // Confirm password check
+  if (signupData.password !== signupData.confirmPassword) {
+    toast.error("Passwords do not match!", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+    return;
+  }
+
+  try {
+    // API call
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/register",
+      {
+        username: signupData.fullName,
+        email: signupData.email,
+        password: signupData.password,
+        role: "CUSTOMER"
+      }
+    );
+
+    toast.success("Signup successful! 🎉", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+
+    console.log("Signup Response:", response.data);
+
+    // Reset form
+    setSignupData({
+      fullName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message || "Signup failed. Please try again.",
+      { position: "top-right", autoClose: 3000 }
+    );
+    console.error("Signup Error:", error);
+  }
+};
 
   return (
     <div className="h-screen flex flex-col lg:flex-row border-b-1 border-sec">
@@ -138,7 +202,7 @@ export default function AuthPageCreative() {
           {/* Forgot Password link */}
           <div className="text-right">
             <a
-              href="#"
+              href="/forgot-password"
               className="text-sm text-main hover:underline"
             >
               Forgot Password?
