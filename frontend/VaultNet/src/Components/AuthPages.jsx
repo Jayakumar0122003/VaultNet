@@ -140,7 +140,7 @@ const handleSignupSubmit = async (e) => {
           <p className="text-base opacity-90">
             Your trusted partner for secure and smart banking solutions.
           </p>
-          <RiMoneyRupeeCircleFill className="w-72 h-72 md:w-80 md:h-80 mt-0 ml-3 md:ml-16" />
+          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 mt-0 ml-12 md:ml-24" />
         </div>
       </div>
 
@@ -207,7 +207,7 @@ const handleSignupSubmit = async (e) => {
           {/* Forgot Password link */}
           <div className="text-right">
             <a
-              href="/forgot-password"
+              href="/vaultnet-authenticate-forgot-password"
               className="text-sm text-main hover:underline"
             >
               Forgot Password?

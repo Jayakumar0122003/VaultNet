@@ -301,7 +301,7 @@ const ForgotPasswordPage = () => {
           toast.info("Navigate back to login page.");
         }}
       >
-        <Link to="/auth">Back to Login</Link>
+        <Link to="/vaultnet-authenticate">Back to Login</Link>
       </span>
     </p>
   )}

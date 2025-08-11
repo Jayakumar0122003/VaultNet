@@ -2,16 +2,17 @@ import { useState, useContext } from "react";
 import { Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { AuthContext } from "./Context/AuthContext";
+import {FaUniversity} from "react-icons/fa"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
 
   const navLinks = [
-    { name: "Bank Account", path: "/bank" },
-    { name: "Make Payments", path: "/payments" },
-    { name: "Account Details", path: "/account" },
-    { name: "Customer Care", path: "/support" },
+    { name: "Bank Account", path: "/vaultnet-bank-account" },
+    { name: "Make Payments", path: "/vaultnet-make-payments" },
+    { name: "Account Details", path: "/vaultnet-account-details-config" },
+    { name: "Customer Care", path: "/vaultnet-customer-support-care" },
   ];
 
   const navLinkClass = ({ isActive }) =>
@@ -27,13 +28,13 @@ export default function Navbar() {
         {/* Logo */}
         <NavLink
           to="/"
-          className="text-2xl font-extrabold text-main tracking-tight hover:scale-105 transition-transform"
+          className="text-xl font-bold uppercase text-main tracking-tight hover:scale-105 transition-transform flex gap-1"
         >
-          VaultNet
+         <FaUniversity className="text-4xl pb-2"/> VaultNet
         </NavLink>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-6 lg:gap-14 text-sm">
+        <div className="hidden lg:flex items-center gap-6 lg:gap-14 text-sm">
           {navLinks.map((link) => (
             <NavLink key={link.name} to={link.path} className={navLinkClass}>
               {link.name}
@@ -42,7 +43,7 @@ export default function Navbar() {
         </div>
 
         {/* Right Actions */}
-        <div className="hidden md:flex items-center gap-7">
+        <div className="hidden lg:flex items-center gap-7">
           {user ? (
             <>
               <span className="text-gray-700 font-medium">
@@ -57,11 +58,11 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <NavLink to="/auth" className={navLinkClass}>
+              <NavLink to="/vaultnet-authenticate" className={navLinkClass}>
                 Login
               </NavLink>
               <NavLink
-                to="/auth"
+                to="/vaultnet-authenticate"
                 className="bg-main text-white px-5 py-2 rounded-full hover:bg-sec hover:text-black shadow-md transition"
               >
                 Get Started
@@ -71,7 +72,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Toggle */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="text-gray-700 hover:text-main transition"
@@ -84,12 +85,12 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {/* Mobile Menu */}
       <div
-        className={`fixed md:hidden top-0 right-0 h-full w-full bg-white shadow-lg border-l border-gray-100 transform transition-transform duration-300 ${
+        className={`fixed lg:hidden z-50 top-0 right-0 h-full w-full bg-white shadow-lg border-l border-gray-100 transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="px-6 py-5 flex justify-between items-center border-b border-gray-300">
-          <span className="text-xl font-bold text-main">VaultNet</span>
+          <span className="text-xl font-bold text-main flex gap-1 uppercase"><FaUniversity className="text-4xl pb-2"/> VaultNet</span>
           <button onClick={() => setIsOpen(false)}>
             <X className="w-6 h-6 text-gray-700" />
           </button>
@@ -108,7 +109,7 @@ export default function Navbar() {
           <hr className="my-4 text-gray-300" />
           {user ? (
             <>
-              <span className="block text-gray-700 font-medium mb-2">
+              <span className="block text-gray-700 font-medium mb-6">
                 Welcome, {user.firstName || "User"}
               </span>
               <button
@@ -124,14 +125,14 @@ export default function Navbar() {
           ) : (
             <>
               <NavLink
-                to="/auth"
+                to="/vaultnet-authenticate"
                 className="block text-gray-700 font-medium hover:text-main transition"
                 onClick={() => setIsOpen(false)}
               >
                 Login
               </NavLink>
               <NavLink
-                to="/auth"
+                to="/vaultnet-authenticate"
                 className="block bg-main text-white text-center py-2 rounded-full hover:bg-sec hover:text-black shadow-md transition"
                 onClick={() => setIsOpen(false)}
               >

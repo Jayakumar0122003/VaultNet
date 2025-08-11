@@ -9,6 +9,7 @@ import com.project.VaultNet.dto.TransactionDto.MoneyDepositRequest;
 import com.project.VaultNet.dto.TransactionDto.MoneyDepositResponse;
 import com.project.VaultNet.dto.cardPinDto.*;
 import com.project.VaultNet.dto.details.AccountDetails;
+import com.project.VaultNet.dto.details.AccountDetailsResponse;
 import com.project.VaultNet.dto.details.DebitCardDetails;
 import com.project.VaultNet.dto.details.DebitCardDetailsRequest;
 import com.project.VaultNet.model.Address;
@@ -206,7 +207,7 @@ public class UserService {
                     user.setVerificationToken(token);
                     userRepository.save(user);
 
-                     String verificationLink = "http://localhost:8080/api/customer/verify?token=" + token;
+                     String verificationLink = "http://localhost:5173/verify?token=" + token;
                      emailServiceImp.sendVerificationEmail(user.getEmail(), verificationLink, user.getFirstName() + " " + user.getLastName());
 
                     return new AccountCreationResponse(true, "Account successfully created");
@@ -316,6 +317,7 @@ public class UserService {
 
     public GenericResponse verifyOtpAndUpdatePhone(VerifyOtpRequest request, Principal principal) {
         Users users = userRepository.findByEmail(principal.getName()).orElseThrow(()-> new RuntimeException("Invalid user!"));
+        DebitCard debitCard = debitCardRepository.findByEmail(users.getEmail()).orElseThrow(()-> new RuntimeException(""));
         if (!users.getResetOtp().equals(request.getOtp())) {
             return new GenericResponse("Invalid or expired OTP", false);
         }
@@ -323,10 +325,12 @@ public class UserService {
         if (users.getResetOtpExpiresAt().isBefore(LocalDateTime.now())) {
             return new GenericResponse("OTP expired",false);
         }
+        debitCard.setPhone(request.getNewPhoneNumber());
         users.setPhone(request.getNewPhoneNumber());
         users.setResetOtp(null);
         users.setResetOtpExpiresAt(null);
         userRepository.save(users);
+        debitCardRepository.save(debitCard);
         return new GenericResponse("Phone Number Successfully Changed!", true);
     }
 
@@ -383,6 +387,7 @@ public class UserService {
         Users user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return UserProfileDTO.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .role(user.getRole())
@@ -395,6 +400,19 @@ public class UserService {
                 .accountCreated(user.isAccountCreated())
                 .createdAt(user.getCreatedAt())
                 .build();
+    }
+
+    public AccountDetailsResponse account(Principal principal) {
+        DebitCard debitCard = debitCardRepository.findByEmail(principal.getName()).orElseThrow(()-> new RuntimeException("Email not valid"));
+
+        return new AccountDetailsResponse(
+                debitCard.getId(),
+                debitCard.getAccountNumber(),
+                debitCard.getCardHolderName(),
+                debitCard.getBalance(),
+                debitCard.getIssuedAt(),
+                debitCard.isPinSet()
+        );
     }
 }
 

@@ -12,6 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 public class UserProfileDTO {
+    private Long id;
     private String email;
     private String username;
     private Role role;

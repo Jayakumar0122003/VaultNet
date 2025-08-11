@@ -5,6 +5,7 @@ import FeatureCards from './Home/FeatureCards.jsx'
 import TestimonialsSection from './Home/TestimonialsSection.jsx'
 import CurrencyRatesSection from './Home/CurrencyRatesSection.jsx'
 import BranchLocatorSection from './Home/BranchLocatorSection.jsx'
+import Footer from "./Home/Footer.jsx"
 
 function Home() {
   return (
@@ -15,6 +16,7 @@ function Home() {
     <CurrencyRatesSection/>
     <BranchLocatorSection/>
     <TestimonialsSection/>
+    <Footer/>
     </>
   )
 }

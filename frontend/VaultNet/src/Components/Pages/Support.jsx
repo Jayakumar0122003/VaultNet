@@ -1,8 +1,11 @@
 import React from 'react'
+import CustomerCare from '../CustomerCare'
 
 function Support() {
   return (
-    <div>Support</div>
+    <div>
+      <CustomerCare/>
+    </div>
   )
 }
 
