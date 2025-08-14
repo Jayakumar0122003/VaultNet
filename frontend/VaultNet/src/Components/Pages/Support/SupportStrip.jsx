@@ -1,13 +1,14 @@
 import React from "react";
 import { Phone, Mail, MessageSquare } from "lucide-react";
+import { FaHandsHelping } from "react-icons/fa";
 
 export default function SupportBanner() {
   return (
     <div className="bg-main text-white py-10 px-6 mb-10">
       <div className="max-w-6xl mx-auto text-center">
         {/* Heading */}
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Need Help? We’re Here 24/7
+        <h2 className="text-3xl md:text-4xl font-bold mb-4 flex md:gap-2 justify-center">
+          <FaHandsHelping className="text-5xl pt-1"/>Need Help? We’re Here 24/7
         </h2>
         <p className="text-base text-gray-300 mb-8">
           Our customer care team is ready to assist you with any questions or concerns.

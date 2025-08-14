@@ -7,13 +7,27 @@ import {toast} from "react-toastify"
 import axios from "axios"
 import {useNavigate} from "react-router-dom"
 import { useContext } from "react";
-import { AuthContext } from "../Components/Context/AuthContext"
-
+import { AuthContext } from "../Context/AuthContext"
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 export default function AuthPageCreative() {
   const [isLogin, setIsLogin] = useState(true);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("mode") === "signup") {
+      setIsLogin(false);
+    } else {
+      setIsLogin(true);
+    }
+  }, [location.search]);
 
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
@@ -37,11 +51,13 @@ export default function AuthPageCreative() {
 
     const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
+      toast.loading("Wait Logging...")
       // API request
-      const response = await axios.post("http://localhost:8080/api/auth/login", loginData);
-
+      const response = await axios.post("http://localhost:8080/api/auth/login", loginData,{withCredentials: true});
+      toast.dismiss();
       // Show success toast
       toast.success("Login successful!", {
         position: "top-right",
@@ -58,21 +74,25 @@ export default function AuthPageCreative() {
       navigate("/")
 
     } catch (error) {
+      toast.dismiss();
       // Show error toast
       toast.error(
-        error.response?.data?.message || "Login failed. Please try again.",
+        error.response?.data?.error || "Login failed. Please try again.",
         {
           position: "top-right",
           autoClose: 3000,
         }
       );
       console.error("Login Error:", error);
+    }finally{
+      setIsSubmitting(false);
     }
   };
 
 
 const handleSignupSubmit = async (e) => {
   e.preventDefault();
+  setIsSubmitting(true);
 
   // Strong password validation
   const strongPasswordRegex =
@@ -92,10 +112,12 @@ const handleSignupSubmit = async (e) => {
       position: "top-right",
       autoClose: 3000,
     });
+    
     return;
   }
 
   try {
+    toast.loading("Wait Registering...")
     // API call
     const response = await axios.post(
       "http://localhost:8080/api/auth/register",
@@ -106,7 +128,7 @@ const handleSignupSubmit = async (e) => {
         role: "CUSTOMER"
       }
     );
-
+    toast.dismiss();
     toast.success("Signup successful! 🎉", {
       position: "top-right",
       autoClose: 3000,
@@ -121,44 +143,48 @@ const handleSignupSubmit = async (e) => {
       password: "",
       confirmPassword: "",
     });
+    navigate("/vaultnet-authenticate?mode=login")
 
   } catch (error) {
+    toast.dismiss();
     toast.error(
       error.response?.data?.message || "Signup failed. Please try again.",
       { position: "top-right", autoClose: 3000 }
     );
     console.error("Signup Error:", error);
+  }finally{
+    setIsSubmitting(false);
   }
 };
 
   return (
-    <div className="h-full lg:h-screen flex flex-col lg:flex-row border-b-1 border-sec">
+    <div className="h-full md:h-screen lg:h-[92vh] flex flex-col lg:flex-row border-b-1 border-sec">
       {/* Left Illustration */}
-      <div className="lg:w-1/2 bg-main flex justify-center items-center p-8">
+      <div className="lg:w-1/3 bg-main flex justify-center items-center p-8">
         <div className="text-center text-white ">
-          <h1 className="text-5xl font-bold mb-4">Welcome to VaultNet</h1>
+          <h1 className="text-5xl font-bold mb-4 uppercase">Welcome to VaultNet</h1>
           <p className="text-base opacity-90">
             Your trusted partner for secure and smart banking solutions.
           </p>
-          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 mt-0 ml-12 md:ml-24" />
+          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 mt-0 ml-12 md:ml-32 lg:ml-8 lg:mt-3"/>
         </div>
       </div>
 
       {/* Right Form Section */}
-      <div className="lg:w-1/2 flex justify-center items-center bg-gray-100 p-6 h-full lg:h-full">
+      <div className="lg:w-full flex justify-center items-center bg-gray-50 p-6 h-full lg:h-full">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-white/80 backdrop-blur-lg p-8 rounded-sm shadow-lg w-full max-w-sm"
+          className={`bg-white backdrop-blur-lg p-8 rounded-sm shadow-lg lg:shadow-xl w-full max-w-sm ${isLogin? `lg:max-w-2xl`: `lg:max-w-5/6`}`}
         >
           {/* Conditional Forms */}
           {isLogin ? (
             <form onSubmit={handleLoginSubmit} className="space-y-6">
-          <h2 className="text-2xl font-bold text-center text-main mb-2 flex gap-2 justify-center">
-            <BiSolidBank className="w-8 h-8"/>Login to VaultNet
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-center text-main mb-2 flex gap-2 justify-center uppercase lg:gap-3">
+            <BiSolidBank className="w-7 h-7 md:w-8 md:h-8 lg:w-10 lg:h-10"/>Login to VaultNet
           </h2>
-          <p className="text-center text-gray-600 mb-4 text-sm italic">
+          <p className="text-center text-gray-600 mb-4 text-sm italic lg:mb-5">
             "Secure, smart, and seamless banking — just for you."
           </p>
 
@@ -216,37 +242,44 @@ const handleSignupSubmit = async (e) => {
           </div>
 
 
-          <button
+          <div className="flex justify-center">
+            <button
+            disabled={isSubmitting}
             type="submit"
-            className="w-full bg-main text-white py-2 rounded-sm hover:opacity-90 transition"
+            className={`w-full bg-main text-white py-2 hover:opacity-80 duration-300 cursor-pointer transition lg:w-[50%] ${isSubmitting && `cursor-not-allowed bg-gray-400`}`}
           >
-            Login Now
+            {isSubmitting? "Logging...": "Login Now"}
           </button>
+          </div>
         </form>
       ) : (
             <form onSubmit={handleSignupSubmit} className="space-y-3">
-              <h2 className="text-2xl lg:text-xl font-bold text-center text-main mb-2 flex gap-1 md:gap-2 justify-center">
-                <BiSolidBank className="w-7 h-7 md:w-8 md:h-8 lg:w-7 lg:h-7 pt-1 md:pt-0"/>Create Your Account
+              <h2 className="text-xl md:text-2xl font-bold text-center text-main mb-2 flex gap-0 md:gap-2 lg:gap-3 justify-center uppercase lg:text-3xl">
+                <BiSolidBank className="w-7 h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 pt-1 md:pt-0"/>Create Your Account
               </h2>
-              <p className="text-center text-gray-600 mb-4 text-sm lg:text-xs italic">
+              <p className="text-center text-gray-600 mb-4 text-sm italic">
                 "Your journey to smart and secure banking starts here."
               </p>
 
-              <label htmlFor="fullName" className="block text-gray-700 font-medium lg:text-sm mb-0">
-                Full Name
+              <div className="lg:grid lg:grid-cols-2 lg:space-x-10 lg:gap-3 lg:p-5 space-y-3">
+                <div>
+                  <label htmlFor="fullName" className="block text-gray-700 font-medium lg:text-sm mb-0">
+                Username
               </label>
               <input
                 id="fullName"
                 type="text"
                 name="fullName"
-                placeholder="Enter your full name"
+                placeholder="Enter your username"
                 value={signupData.fullName}
                 onChange={handleSignupChange}
                 className="w-full border-0 border-b-2 border-gray-200 focus:outline-none focus:border-main px-1 py-2 placeholder:text-sm placeholder:uppercase"
                 required
               />
+                </div>
 
-              <label htmlFor="signupEmail" className="block text-gray-700 font-medium mb-0 lg:text-sm">
+              <div>
+                <label htmlFor="signupEmail" className="block text-gray-700 font-medium mb-0 lg:text-sm">
                 Email Address
               </label>
               <input
@@ -259,8 +292,10 @@ const handleSignupSubmit = async (e) => {
                className="w-full border-0 border-b-2 border-gray-200 focus:outline-none focus:border-main px-1 py-2 placeholder:text-sm placeholder:uppercase"
                 required
               />
+              </div>
 
-              <label htmlFor="signupPassword" className="block text-gray-700 font-medium mb-0 lg:text-sm">
+              <div>
+                <label htmlFor="signupPassword" className="block text-gray-700 font-medium mb-0 lg:text-sm">
                 Password
               </label>
               <input
@@ -273,11 +308,13 @@ const handleSignupSubmit = async (e) => {
                 className="w-full border-0 border-b-2 border-gray-200 focus:outline-none focus:border-main px-1 py-2 placeholder:text-sm placeholder:uppercase"
                 required
               />
-              <p className="text-xs text-gray-500 -mt-2">
+              <p className="text-xs text-gray-500 mt-1 italic px-1">
                 Password should be at least 8 characters, include an uppercase letter, number, and special character.
               </p>
 
-              <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-0 lg:text-sm">
+              </div>
+              <div>
+                <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-0 lg:text-sm">
                 Confirm Password
               </label>
               <input
@@ -290,6 +327,7 @@ const handleSignupSubmit = async (e) => {
                 className="w-full border-0 border-b-2 border-gray-200 focus:outline-none focus:border-main px-1 py-2 placeholder:text-sm placeholder:uppercase"
                 required
               />
+              </div>
 
               <div className="flex items-center">
                 <input
@@ -303,13 +341,17 @@ const handleSignupSubmit = async (e) => {
                   Show Password
                 </label>
               </div>
+              </div>
 
-              <button
+              <div className="flex justify-center">
+                <button
                 type="submit"
-                className="w-full bg-main text-white py-2 rounded-sm hover:opacity-90 transition"
+                disabled={isSubmitting}
+                className={`w-full bg-main text-white py-2 hover:opacity-80 duration-300 transition lg:w-[40%] cursor-pointer ${isSubmitting && `cursor-not-allowed bg-gray-400`}`}
               >
-                Sign Up
+                {isSubmitting ? "Creating...": "Create Account"}
               </button>
+              </div>
             </form>
           )}
 

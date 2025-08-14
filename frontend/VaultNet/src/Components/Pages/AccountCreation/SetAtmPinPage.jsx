@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "../axiosInstance"; // adjust path
+import axios from "../../../axiosInstance"; // adjust path
 import { toast } from "react-toastify";
 import { FaStarOfLife } from "react-icons/fa";
 
@@ -15,38 +15,61 @@ export default function SetAtmPinPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Frontend PIN confirmation check
-    if (formData.pin !== formData.confirmPin) {
-      toast.error("PIN and Confirm PIN do not match!");
-      return;
-    }
+  if (formData.pin !== formData.confirmPin) {
+    toast.error("PIN and Confirm PIN do not match!");
+    return;
+  }
 
-    const loadingToastId = toast.loading("Setting your ATM PIN...");
+  const loadingToastId = toast.loading("Setting your ATM PIN...");
 
-    try {
-        const accessToken = localStorage.getItem("accessToken")
-      // Send only lastFourDigits & pin to backend
-      const res = await axios.post("/customer/set-pin", {
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+
+    const res = await axios.post(
+      "/customer/set-pin",
+      {
         lastFourDigits: formData.lastFourDigits,
-        pin: formData.pin,
+        pin: formData.pin
+      },
+      {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+      }
+    );
+
+    if (!res.data?.success) {
+      toast.update(loadingToastId, {
+        render: res.data?.message || "Failed to set PIN.",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
       });
-
-      toast.dismiss(loadingToastId);
-      toast.success(res.data?.message || "PIN set successfully!");
-
-      // Reset form
-      setFormData({ lastFourDigits: "", pin: "", confirmPin: "" });
-      window.location.reload();
-    } catch (err) {
-      toast.dismiss(loadingToastId);
-      toast.error(err.response?.data || "Failed to set PIN.");
+      return;
     }
-  };
+
+    toast.update(loadingToastId, {
+      render: res.data?.message || "PIN set successfully!",
+      type: "success",
+      isLoading: false,
+      autoClose: 3000,
+    });
+
+    setFormData({ lastFourDigits: "", pin: "", confirmPin: "" });
+    window.location.reload();
+
+  } catch (err) {
+    toast.update(loadingToastId, {
+      render: err.response?.data?.message || "Failed to set PIN.",
+      type: "error",
+      isLoading: false,
+      autoClose: 3000,
+    });
+  }
+};
+
 
   return (
     <div className="h-full md:h-[60vh] lg:h-full flex-1 pb-10 lg:py-10 p-0 w-full">
@@ -88,7 +111,7 @@ export default function SetAtmPinPage() {
               <input
                 type="password"
                 name="pin"
-                maxLength={6}
+                maxLength={4}
                 value={formData.pin}
                 onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -104,7 +127,7 @@ export default function SetAtmPinPage() {
               <input
                 type="password"
                 name="confirmPin"
-                maxLength={6}
+                maxLength={4}
                 value={formData.confirmPin}
                 onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -115,7 +138,7 @@ export default function SetAtmPinPage() {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-center">
+          <div className="flex justify-end px-5">
             <button
               type="submit"
               className="w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"

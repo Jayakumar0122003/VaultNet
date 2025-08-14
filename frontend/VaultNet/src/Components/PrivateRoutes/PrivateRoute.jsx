@@ -19,5 +19,10 @@ export default function PrivateRoute({ children }) {
     return <Navigate to={"/vaultnet-authenticate"} replace />;
   }
 
+  if (!user?.accountCreated || !user?.emailVerified) {
+    // Already created → redirect to home/dashboard
+    return <Navigate to="/vaultnet-bank-account" replace />;
+  }
+
   return children;
 }

@@ -1,7 +1,18 @@
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import { AuthContext } from "../Context/AuthContext";
+import { useContext } from "react";
 
 export default function Banner() {
+  const {user,loading} = useContext(AuthContext);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-600 dark:text-gray-300 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 dark:border-white"></div>
+        <span className="ml-3">Loading...</span>
+      </div>
+    );
+  }
   return (
     <section className="w-full bg-white pt-4 px-4 md:px-10 lg:px-14">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-12">
@@ -34,12 +45,18 @@ export default function Banner() {
               transition={{ delay: 0.3 }}
             className="mt-8 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4"
           >
+            {user ? <a
+              href="/vaultnet-bank-account"
+              className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"
+            >
+              Bank Account
+            </a>:
             <a
-              href="/get-started"
+              href="/vaultnet-authenticate?mode=signup"
               className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"
             >
               Get Started
-            </a>
+            </a>}
             <a
               href="#features"
               className="text-main font-semibold hover:underline hover:text-black"

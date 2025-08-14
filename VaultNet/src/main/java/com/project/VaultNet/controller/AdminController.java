@@ -7,6 +7,7 @@ import com.project.VaultNet.repository.DebitCardRepository;
 import com.project.VaultNet.service.DebitCardService;
 import com.project.VaultNet.service.SupportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,12 +50,21 @@ public class AdminController {
     }
 
     @GetMapping("/users-tickets")
-    public List<SupportTicketResponse> getAllTicketsForAdmin() {
-        return supportService.getAllTicketsForAdmin();
+    public ResponseEntity<?> getAllTicketsForAdmin() {
+        try {
+            List<SupportTicketResponse> tickets = supportService.getAllTicketsForAdmin();
+            return ResponseEntity.ok(tickets);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch tickets: " + e.getMessage());
+        }
     }
 
+
     @PutMapping("/close-ticket/{ticketId}")
-    public CloseRequestResponse closeTicket(@PathVariable Long ticketId){
-        return supportService.closeSupportTicket(ticketId);
+    public ResponseEntity<CloseRequestResponse> closeTicket(@PathVariable Long ticketId) {
+        CloseRequestResponse response = supportService.closeSupportTicket(ticketId);
+        return ResponseEntity.ok(response);
     }
+
 }

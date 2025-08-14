@@ -1,9 +1,10 @@
 package com.project.VaultNet.filter;
 
-
 import com.project.VaultNet.security.CustomUserDetails;
 import com.project.VaultNet.security.CustomUserDetailsService;
 import com.project.VaultNet.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,25 +26,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     CustomUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        HttpServletRequest req = (HttpServletRequest) request;
-        String authHeader = req.getHeader("Authorization");
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            String email = jwtService.extractUsername(token);
+        String authHeader = request.getHeader("Authorization");
 
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
-                if (jwtService.isTokenValid(token)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                String email = jwtService.extractUsername(token);
+
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
+                    if (jwtService.isTokenValid(token)) {
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails, null, userDetails.getAuthorities());
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
                 }
             }
+            filterChain.doFilter(request, response);
+
+        } catch (ExpiredJwtException ex) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Access token expired\"}");
+
+        } catch (JwtException ex) { // Covers malformed, unsupported, or invalid tokens
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Invalid token\"}");
         }
-        filterChain.doFilter(request, response);
     }
 }
-

@@ -1,6 +1,7 @@
 import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram, FaYoutube } from "react-icons/fa";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import {FaUniversity} from "react-icons/fa"
 
 export default function Footer() {
   return (
@@ -13,7 +14,7 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
         >
-          <h2 className="text-white text-xl font-semibold mb-4">VaultNet Bank</h2>
+          <h2 className="text-white text-2xl md:text-xl lg:text-3xl font-semibold mb-4 flex gap-2 uppercase"><FaUniversity className="pt-1 text-3xl lg:text-4xl"/>VaultNet Bank</h2>
           <p className="text-sm leading-6">
             VaultNet is your trusted partner for secure banking and financial growth.
             We offer world-class online banking, credit solutions, and investment plans 

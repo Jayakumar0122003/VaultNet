@@ -2,19 +2,24 @@ package com.project.VaultNet.service;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
+import com.project.VaultNet.customexceptions.ResourceNotFoundException;
 import com.project.VaultNet.model.DebitCard;
 import com.project.VaultNet.model.Users;
 import com.project.VaultNet.repository.DebitCardRepository;
 import com.project.VaultNet.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -120,7 +125,6 @@ public class DebitCardService {
         document.close();
     }
 
-
     private String generateCardNumber() {
         Random random = new Random();
         StringBuilder cardNum = new StringBuilder("4123 ");
@@ -154,4 +158,45 @@ public class DebitCardService {
         return debitCardRepository.save(card);
     }
 
+    public ResponseEntity<String> sendAtmCard(Principal principal) {
+        try {
+            Users user = userRepository.findByEmail(principal.getName())
+                    .orElseThrow(() -> new ResourceNotFoundException("Invalid session"));
+
+            DebitCard debitCard = debitCardRepository.findByEmail(user.getEmail())
+                    .orElseThrow(() -> new ResourceNotFoundException("Debit card not found for user"));
+
+            String firstName = debitCard.getCardHolderName().split(" ")[0].toUpperCase();
+            String password = firstName.substring(0, Math.min(4, firstName.length())) +
+                    debitCard.getPhone().substring(debitCard.getPhone().length() - 4);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            generateCardPdf(debitCard.getCardHolderName(), debitCard.getCardNumber(),
+                    debitCard.getExpiryDate(), debitCard.getCvv(), baos, password);
+
+            // Prepare email
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(debitCard.getEmail());
+            helper.setSubject("🎉 Your Virtual Debit Card is Ready!");
+            helper.setText("Hi " + debitCard.getCardHolderName() + ",\n\n" +
+                    "Your encrypted virtual debit card is attached.\n\n" +
+                    "Password: First 4 letters of your name (CAPITAL) + last 4 digits of your phone number.\n\nUse it safely!");
+
+            ByteArrayResource pdfAttachment = new ByteArrayResource(baos.toByteArray());
+            helper.addAttachment("VirtualDebitCard.pdf", pdfAttachment);
+
+            mailSender.send(message);
+
+            return ResponseEntity.status(HttpStatus.ACCEPTED)
+                    .body("Virtual debit card sent successfully to your email.");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error sending virtual debit card: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while sending your virtual debit card.");
+        }
+    }
 }

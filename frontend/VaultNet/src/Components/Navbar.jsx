@@ -1,29 +1,49 @@
 import { useState, useContext } from "react";
-import { Menu, X } from "lucide-react";
+import {  Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { AuthContext } from "./Context/AuthContext";
 import {FaUniversity} from "react-icons/fa"
+import { MdLogout } from "react-icons/md";
+import { useLocation } from "react-router-dom";
+import { FaBookOpen } from "react-icons/fa";
+import { MdPayment } from "react-icons/md";
+import { TbListDetails } from "react-icons/tb";
+import { BiSupport } from "react-icons/bi";
+import { FaUserCircle } from "react-icons/fa";
+import { AiFillHome } from "react-icons/ai";
+
+
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, loading } = useContext(AuthContext);
+
+   const location = useLocation();
+  if (location.pathname === "/vaultnet-verify-account") {
+    return null; // don't render navbar
+  }
 
   const navLinks = [
-    { name: "Bank Account", path: "/vaultnet-bank-account" },
-    { name: "Make Payments", path: "/vaultnet-make-payments" },
-    { name: "Account Details", path: "/vaultnet-account-details-config" },
-    { name: "Customer Care", path: "/vaultnet-customer-support-care" },
+    { name: "Bank Account", path: "/vaultnet-bank-account", icon: <FaBookOpen className="text-lg"/> },
+    { name: "Make Payments", path: "/vaultnet-make-payments", icon: <MdPayment className="text-xl"/> },
+    { name: "Account Details", path: "/vaultnet-account-details-config", icon: <TbListDetails className="text-lg"/> },
+    { name: "Customer Care", path: "/vaultnet-customer-support-care", icon: <BiSupport className="text-lg"/>},
+
   ];
 
   const navLinkClass = ({ isActive }) =>
-    `relative font-medium transition duration-300 ${
+    `relative font-medium transition duration-300 flex gap-2 items-center justify-center ${
       isActive
         ? "text-main after:absolute after:bottom-[-6px] after:left-0 after:w-full after:h-[2px] after:bg-main"
         : "text-gray-700 hover:text-main"
     }`;
 
+  if(loading){
+    return <div className="navbar"></div>;
+  }  
+
   return (
-    <nav className="w-full bg-white shadow-lg top-0 left-0 z-50 border-b border-gray-100">
+    <nav className="w-full bg-gray-50 shadow-lg top-0 left-0 z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <NavLink
@@ -34,36 +54,39 @@ export default function Navbar() {
         </NavLink>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-6 lg:gap-14 text-sm">
+        <>
+        {user ? <div className="hidden lg:flex items-center gap-6 lg:gap-14 text-sm">
           {navLinks.map((link) => (
             <NavLink key={link.name} to={link.path} className={navLinkClass}>
-              {link.name}
+              {link.icon}{link.name}
             </NavLink>
           ))}
-        </div>
+        </div>:
+        <></>}
+        </>
 
         {/* Right Actions */}
         <div className="hidden lg:flex items-center gap-7">
           {user ? (
             <>
-              <span className="text-gray-700 font-medium">
-                Welcome, {user.firstName || "User"}
+              <span className="text-gray-700 font-medium text-sm flex gap-1 items-center">
+                <FaUserCircle className="text-xl"/>Welcome,   { user.firstName || "user"}
               </span>
               <button
                 onClick={logout}
-                className="bg-red-500 text-white px-8 py-2 rounded-full hover:bg-red-600 transition"
+                className="flex gap-1 uppercase font-semibold justify-center items-center text-red-700 hover:text-red-900 duration-200 cursor-pointer text-sm"
               >
-                Logout
+              Exit< MdLogout className="text-base"/>
               </button>
             </>
           ) : (
             <>
-              <NavLink to="/vaultnet-authenticate" className={navLinkClass}>
-                Login
+              <NavLink to="/vaultnet-authenticate?mode=login" className={navLinkClass}>
+                <FaUserCircle className="text-xl"/>Login
               </NavLink>
               <NavLink
-                to="/vaultnet-authenticate"
-                className="bg-main text-white px-5 py-2 rounded-full hover:bg-sec hover:text-black shadow-md transition"
+                to="/vaultnet-authenticate?mode=signup"
+                className="bg-main text-white px-5 py-2 rounded-full shadow-md transition hover:opacity-80 duration-300"
               >
                 Get Started
               </NavLink>
@@ -96,44 +119,53 @@ export default function Navbar() {
           </button>
         </div>
         <div className="px-6 py-4 space-y-4">
+          {user ? <>
           {navLinks.map((link) => (
             <NavLink
               key={link.name}
               to={link.path}
-              className="block text-gray-700 font-medium hover:text-main transition"
+              className=" text-gray-700 font-medium hover:text-main transition flex gap-2 items-center"
               onClick={() => setIsOpen(false)}
             >
-              {link.name}
+              {link.icon}{link.name}
             </NavLink>
           ))}
           <hr className="my-4 text-gray-300" />
+          </>:<></>}
           {user ? (
             <>
-              <span className="block text-gray-700 font-medium mb-6">
-                Welcome, {user.firstName || "User"}
+              <span className="text-gray-700 font-medium mb-3 text-base flex gap-2 items-center">
+                <FaUserCircle className="text-lg"/>Welcome, {user.firstName || "User"}
               </span>
               <button
                 onClick={() => {
                   logout();
                   setIsOpen(false);
                 }}
-                className="w-full bg-red-500 text-white py-2 rounded-full hover:bg-red-600 transition"
+                className="flex gap-1 uppercase font-semibold justify-center items-center text-red-700 hover:text-red-900 duration-200 cursor-pointer text-base"
               >
-                Logout
+                Exit< MdLogout className="text-xl"/>
               </button>
             </>
           ) : (
             <>
-              <NavLink
-                to="/vaultnet-authenticate"
-                className="block text-gray-700 font-medium hover:text-main transition"
+            <NavLink
+                to="/"
+                className="text-gray-700 font-medium hover:text-main transition text-center uppercase flex items-center gap-2"
                 onClick={() => setIsOpen(false)}
               >
-                Login
+                <AiFillHome className="text-xl"/>Home
               </NavLink>
               <NavLink
-                to="/vaultnet-authenticate"
-                className="block bg-main text-white text-center py-2 rounded-full hover:bg-sec hover:text-black shadow-md transition"
+                to="/vaultnet-authenticate?mode=login"
+                className="text-gray-700 font-medium hover:text-main transition text-center uppercase flex items-center gap-2"
+                onClick={() => setIsOpen(false)}
+              >
+                <FaUserCircle className="text-lg"/>Login
+              </NavLink>
+              <NavLink
+                to="/vaultnet-authenticate?mode=signup"
+                className="block bg-main text-white text-center py-2 rounded-full hover:opacity-80 duration-300 hover:text-black shadow-md transition"
                 onClick={() => setIsOpen(false)}
               >
                 Get Started

@@ -5,18 +5,24 @@ import { AuthContext } from "./Components/Context/AuthContext";
 
 // Pages
 import Home from "./Components/Home";
-import AuthPages from "./Components/AuthPages";
-import ForgotPasswordPage from "./Components/ForgotPassword";
-import CreateAccountPage from "./Components/CreateAccountPage";
+import AuthPages from "./Components/Auth/AuthPages";
+import ForgotPasswordPage from "./Components/Auth/ForgotPassword";
+import CreateAccountPage from "./Components/Pages/CreateAccountPage";
 import Payments from "./Components/Pages/MakePayment";
 import Account from "./Components/Pages/AccountDetails";
 import Support from "./Components/Pages/Support";
-import VerifyEmailPage from "./Components/VerifyEmailPage";
-import SetAtmPinPage from "./Components/SetAtmPinPage";
+import VerifyEmailPage from "./Components/Pages/AccountCreation/VerifyEmailPage";
+import SetAtmPinPage from "./Components/Pages/AccountCreation/SetAtmPinPage";
+import ForgotPin from "./Components/Pages/AccountDetails/ForgotPin"
+
 
 // Routes
 import PrivateRoute from "./Components/PrivateRoutes/PrivateRoute";
 import OneTimeRoute from "./Components/PrivateRoutes/OneTimeRoute";
+import PublicRoute from "./Components/PrivateRoutes/PublicRoute";
+import AccountRoute from "./Components/PrivateRoutes/AccountRoute";
+import NotFoundPage from "./Components/Auth/NotFoundPage";
+import AdminAuthPage from "./Components/Auth/AdminAuthPage";
 
 export default function AppRoutes() {
   const { user, account } = useContext(AuthContext);
@@ -25,7 +31,15 @@ export default function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<Home />} />
-      <Route path="/vaultnet-authenticate" element={<AuthPages />} />
+       <Route path="*" element={<NotFoundPage/>} />
+      <Route 
+    path="/vaultnet-authenticate" 
+    element={
+      <PublicRoute>
+        <AuthPages />
+      </PublicRoute>
+    } 
+  />
       <Route
         path="/vaultnet-authenticate-forgot-password"
         element={<ForgotPasswordPage />}
@@ -35,9 +49,9 @@ export default function AppRoutes() {
       <Route
         path="/vaultnet-bank-account"
         element={
-          <PrivateRoute>
+          <AccountRoute>
             <CreateAccountPage />
-          </PrivateRoute>
+          </AccountRoute>
         }
       />
       <Route
@@ -65,6 +79,15 @@ export default function AppRoutes() {
         }
       />
 
+      <Route
+        path="/vaultnet-forgot-atm-pin"
+        element={
+          <PrivateRoute>
+            <ForgotPin/>
+          </PrivateRoute>
+        }
+      />
+
       {/* One-time use routes */}
       <Route
         path="/vaultnet-set-atm-pin"
@@ -75,13 +98,24 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/vaultnet-verify-email"
+        path="/vaultnet-verify-account"
         element={
           <OneTimeRoute condition={user?.emailVerified} redirectTo="/">
             <VerifyEmailPage />
           </OneTimeRoute>
         }
       />
+      {/* -------------------------------------------------------------------------------------------- */}
+
+      <Route 
+    path="/vaultnet-authenticate-admin" 
+    element={
+      <PublicRoute>
+        <AdminAuthPage/>
+      </PublicRoute>
+    } 
+  />
+
     </Routes>
   );
 }

@@ -30,7 +30,7 @@ const ForgotPasswordPage = () => {
 };
 
   const handleSendCode = async () => {
-  if (!email) {
+  if (!email.trim()) {
     toast.warning("Please enter your email");
     return;
   }
@@ -38,48 +38,72 @@ const ForgotPasswordPage = () => {
   const loadingToastId = toast.loading("Sending reset code...");
 
   try {
-    const response = await axios.post("http://localhost:8080/api/auth/forgot-password", { email });
-     toast.dismiss();
-    toast.update(loadingToastId, {
-      render: response.data.message || "Reset code sent to your email",
-      type: "success",
-      isLoading: false,
-      autoClose: 3000,
-    });
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/forgot-password",
+      { email: email.trim() }
+    );
 
-    setStep(2);
+    toast.dismiss(loadingToastId);
+
+    // Extract message safely
+    const success = response.data?.success;
+    const message = response.data?.data?.message || "Reset code sent to your email";
+
+    if (success) {
+      toast.success(message);
+      setStep(2); // move to next step only on success
+    } else {
+      toast.error(message || "Failed to send reset code");
+    }
   } catch (error) {
-     toast.dismiss();
-    toast.update(loadingToastId, {
-      render: error.response?.data?.message || "Failed to send reset code",
-      type: "error",
-      isLoading: false,
-      autoClose: 3000,
-    });
+    toast.dismiss(loadingToastId);
+
+    const errorMsg =
+      error.response?.data?.message ||
+      error.message ||
+      "Something went wrong";
+    toast.error(errorMsg);
   }
 };
 
-  const handleVerifyCode = async () => {
+
+ const handleVerifyCode = async () => {
   const fullCode = code.join('');
+
   if (fullCode.length !== 6 || code.includes("")) {
     toast.error("Please enter all 6 digits");
     return;
   }
 
+  const loadingToastId = toast.loading("Verifying OTP...");
+
   try {
-    toast.loading("Verifing...")
-    const response = await axios.post(`http://localhost:8080/api/auth/verify-otp`, {
-      email,
-      code: fullCode
-    });
-    toast.dismiss();
-    toast.success(response.data.message || "Code verified!");
-    setStep(3);
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/verify-otp",
+      { email, otp: fullCode }
+    );
+
+    toast.dismiss(loadingToastId);
+
+    const { success, message } = response.data;
+
+    if (success) {
+      toast.success(message || "OTP verified successfully!");
+      setStep(3); // Move to next step only on success
+    } else {
+      toast.error(message || "Invalid or expired code");
+    }
   } catch (error) {
-     toast.dismiss();
-    toast.error(error.response?.data?.message || "Invalid or expired code");
+    toast.dismiss(loadingToastId);
+
+    const errorMsg =
+      error.response?.data?.message ||
+      error.message ||
+      "Something went wrong while verifying OTP";
+    toast.error(errorMsg);
   }
 };
+
 
   const handleCodeChange = (value, index) => {
     if (!/^[0-9]?$/.test(value)) return;
@@ -101,28 +125,48 @@ const ForgotPasswordPage = () => {
   }
 
   // Password strength validation
-  const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
+  const strongPasswordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
 
   if (!strongPasswordRegex.test(password)) {
-    toast.warning("Password must be at least 8 characters long and include uppercase, lowercase, number, and special character");
+    toast.warning(
+      "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
+    );
     return;
   }
 
+  const loadingToastId = toast.loading("Resetting password...");
+
   try {
-  
-    toast.loading("Reseting password...")
-    const response = await axios.post(`http://localhost:8080/api/auth/reset-password`, {
-      email,
-      newPassword: password,
-    });
-     toast.dismiss();
-    toast.success(response.data.message || "Password reset successful!");
-    navigate("/auth")
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/reset-password",
+      {
+        email,
+        newPassword: password,
+      }
+    );
+
+    toast.dismiss(loadingToastId);
+
+    const { success, message } = response.data;
+
+    if (success) {
+      toast.success(message || "Password reset successful!");
+      navigate("/vaultnet-authenticate"); // redirect to login
+    } else {
+      toast.error(message || "Failed to reset password");
+    }
   } catch (error) {
-     toast.dismiss();
-    toast.error(error.response?.data?.message || "Failed to reset password");
+    toast.dismiss(loadingToastId);
+
+    const errorMsg =
+      error.response?.data?.message ||
+      error.message ||
+      "Something went wrong while resetting password";
+    toast.error(errorMsg);
   }
 };
+
 
 
   return (

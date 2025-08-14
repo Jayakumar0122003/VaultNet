@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaUniversity, FaMoneyBillWave, FaLock } from "react-icons/fa";
-import axiosInstance from "../axiosInstance"; // your axios with token
+import axiosInstance from "../../../axiosInstance"; // your axios with token
 import {toast} from "react-toastify"
 // import { useNavigate } from "react-router-dom";
 
@@ -75,7 +75,7 @@ export default function ProfessionalAtmForm() {
 };
 
   return (
-    <div className=" w-[90%] md:w-[400px] mt-10 p-8 bg-main rounded-sm text-white shadow-lg">
+    <div className=" w-[90%] md:w-[400px] mt-10 p-8 bg-main text-white shadow-sm">
       <h1 className="text-2xl font-extrabold text-white mb-4 text-center">
         ATM
       </h1>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
-import axiosInstance from "../../axiosInstance";
-import { AuthContext } from "../Context/AuthContext";
+import axiosInstance from "../../../axiosInstance";
+import { AuthContext } from "../../Context/AuthContext";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { FaDownload } from "react-icons/fa";
@@ -32,9 +32,18 @@ export default function TransactionsPage() {
 
       const res = await axiosInstance.get(url);
 
-      const fetchedData = Array.isArray(res.data) ? res.data : [];
+      if (res.data.success) {
+      const fetchedData = Array.isArray(res.data.transactions) ? res.data.transactions : [];
       setAllTransactions(fetchedData);
       setTransactions(fetchedData);
+
+      if (fetchedData.length === 0) {
+       console.log("No transactions found for your account.");
+      }
+    } else {
+      // Backend sent success: false
+      console.error(res.data.message || "Failed to fetch transactions");
+    }
     } catch (err) {
       console.error("Error fetching transactions:", err);
     }
@@ -144,6 +153,10 @@ export default function TransactionsPage() {
     <div className="flex-1 bg-gray-50">
 
     <h1 className="text-xl uppercase py-5 bg-main font-semibold text-white px-5 md:px-20">VaultNet Bank - Transactions Statement</h1>
+
+    <p className="px-5 md:px-24 text-xs italic text-gray-700 py-5 pb-2">
+                ***Our transaction services enable you to securely send, receive, and monitor your funds with ease. Every transaction is processed with high-level encryption to protect your financial information. You can view your transaction history anytime to keep track of your spending and deposits. For your security, always verify transaction details before confirming and notify us immediately if you notice any suspicious activity. Managing your money has never been safer or more convenient.***
+              </p>
     <div className="px-5 md:px-20 py-20 pt-10">
       {/* Filters */}
       <div className="bg-sec p-8 shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row justify-between gap-4 md:items-center">

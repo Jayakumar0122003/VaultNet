@@ -1,5 +1,7 @@
 package com.project.VaultNet.service;
 
+import com.project.VaultNet.customexceptions.InvalidCredentialsException;
+import com.project.VaultNet.customexceptions.ResourceNotFoundException;
 import com.project.VaultNet.dto.Support.GetAllTicketsByUserResponse;
 import com.project.VaultNet.dto.Support.SupportRequest;
 import com.project.VaultNet.dto.Support.SupportResponse;
@@ -27,9 +29,13 @@ public class SupportService {
     @Autowired
     SupportTicketRepository supportTicketRepository;
 
-    public SupportResponse raiseTicket(SupportRequest request) {
-        Users user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(()-> new RuntimeException("Invalid Email Address!"));
+    public SupportResponse raiseTicket(SupportRequest request, Principal principal) {
+        Users user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid Email Address!"));
+
+        if (!user.getEmail().equals(request.getEmail())) {
+            throw new InvalidCredentialsException("Email address does not match logged-in user.");
+        }
 
         SupportTicket supportTicket = new SupportTicket();
         supportTicket.setSubject(request.getSubject());
@@ -39,49 +45,79 @@ public class SupportService {
         supportTicket.setUserTicket(user);
         supportTicket.setStatus("OPEN");
         supportTicket.setCreatedAt(Instant.now());
+
         supportTicketRepository.save(supportTicket);
-        return new SupportResponse(true, "Ticket Successfully raise!");
+
+        return new SupportResponse(true, "Ticket successfully raised!");
     }
 
-    public GetAllTicketsByUserResponse getAllTicketsByUser(Long id, Principal principal) {
-        Users user = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("Invalid Access!"));
 
-        if (!user.getId().equals(id)) {
-            // Return empty list or throw exception depending on use case
-            return new GetAllTicketsByUserResponse("Access Denied: You cannot view other users' tickets.", Collections.emptyList());
+    public GetAllTicketsByUserResponse getAllTicketsByUser(Long userId, Principal principal) {
+        try {
+            Users user = userRepository.findByEmail(principal.getName())
+                    .orElseThrow(() -> new ResourceNotFoundException("Invalid Access!"));
+
+            if (!user.getId().equals(userId)) {
+                return new GetAllTicketsByUserResponse(
+                        "Access Denied: You cannot view other users' tickets.",
+                        Collections.emptyList()
+                );
+            }
+
+            List<SupportTicket> tickets = supportTicketRepository.findByUserTicket_Id(userId);
+            return new GetAllTicketsByUserResponse("Success", tickets);
+
+        } catch (ResourceNotFoundException e) {
+            return new GetAllTicketsByUserResponse("Error: " + e.getMessage(), Collections.emptyList());
+        } catch (Exception e) {
+            return new GetAllTicketsByUserResponse(
+                    "Unexpected error occurred: " + e.getMessage(),
+                    Collections.emptyList()
+            );
         }
-
-        List<SupportTicket> tickets = supportTicketRepository.findByUserTicket_Id(id);
-        return new GetAllTicketsByUserResponse("Success", tickets);
     }
+
 
     public List<SupportTicketResponse> getAllTicketsForAdmin() {
-        List<SupportTicket> tickets = supportTicketRepository.findAll();
+        try {
+            List<SupportTicket> tickets = supportTicketRepository.findAll();
 
-        return tickets.stream()
-                .map(ticket -> SupportTicketResponse.builder()
-                        .id(ticket.getId())
-                        .email(ticket.getEmail())
-                        .subject(ticket.getSubject())
-                        .message(ticket.getMessage())
-                        .status(ticket.getStatus())
-                        .createdAt(ticket.getCreatedAt())
-                        .username(ticket.getUserTicket().getUsername())
-                        .build())
-                .toList();
+            return tickets.stream()
+                    .map(ticket -> SupportTicketResponse.builder()
+                            .id(ticket.getId())
+                            .email(ticket.getEmail())
+                            .subject(ticket.getSubject())
+                            .message(ticket.getMessage())
+                            .status(ticket.getStatus())
+                            .createdAt(ticket.getCreatedAt())
+                            .username(ticket.getUserTicket() != null ? ticket.getUserTicket().getUsername() : "Unknown")
+                            .build())
+                    .toList();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch tickets for admin: " + e.getMessage());
+        }
     }
+
 
     public CloseRequestResponse closeSupportTicket(Long ticketId) {
-        SupportTicket ticket = supportTicketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found with ID: " + ticketId));
+        try {
+            SupportTicket ticket = supportTicketRepository.findById(ticketId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with ID: " + ticketId));
 
-        if ("CLOSED".equalsIgnoreCase(ticket.getStatus())) {
-            return new CloseRequestResponse(false,"Ticket is already closed.");
+            if ("CLOSED".equalsIgnoreCase(ticket.getStatus())) {
+                return new CloseRequestResponse(false, "Ticket is already closed.");
+            }
+
+            ticket.setStatus("CLOSED");
+            supportTicketRepository.save(ticket);
+
+            return new CloseRequestResponse(true, "Ticket closed successfully.");
+        } catch (ResourceNotFoundException e) {
+            // Log if needed
+            return new CloseRequestResponse(false, e.getMessage());
+        } catch (Exception e) {
+            return new CloseRequestResponse(false, "An error occurred while closing the ticket.");
         }
-
-        ticket.setStatus("CLOSED");
-        supportTicketRepository.save(ticket);
-        return new CloseRequestResponse(true,"Ticket closed successfully.");
     }
+
 }

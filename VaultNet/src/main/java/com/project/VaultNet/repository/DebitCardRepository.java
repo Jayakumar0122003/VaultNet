@@ -18,4 +18,6 @@ public interface DebitCardRepository extends JpaRepository<DebitCard, Long> {
     List<DebitCard> findAllByCardBlockedTrue();
     Optional<DebitCard> findByOtp(String otp);
     Optional<DebitCard> findByPinHash(String encode);
+
+    Optional<DebitCard> findByUserIdAndPhoneEndingWith(Long id, String lastFourDigits);
 }

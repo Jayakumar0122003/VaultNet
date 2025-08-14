@@ -24,5 +24,6 @@ public class UserProfileDTO {
     private LocalDate dob;
     private boolean emailVerified;
     private boolean accountCreated;
+    private String verificationLink;
     private Date createdAt;
 }

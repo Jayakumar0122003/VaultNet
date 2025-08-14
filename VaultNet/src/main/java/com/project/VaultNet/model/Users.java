@@ -41,6 +41,7 @@ public class Users {
 
     private String lastName;
 
+    @Column(unique = true)
     private String phone;
 
     @Embedded
@@ -65,6 +66,9 @@ public class Users {
 
     @Column(name = "reset_otp_expires_at")
     private LocalDateTime resetOtpExpiresAt;
+
+    @Column(name = "verification_link")
+    private String verificationLink;
 
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

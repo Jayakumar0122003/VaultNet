@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiLock } from "react-icons/fi";
-import axiosInstance from "../axiosInstance";
+import axiosInstance from "../../../axiosInstance";
 
 export default function AtmCard() {
   const [showInput, setShowInput] = useState(false);
@@ -33,7 +33,7 @@ export default function AtmCard() {
       });
 
       // Example: assuming response.data has card details without cvv
-      const data = response.data;
+      const data = response.data.data;
 
       // Add masked CVV
       data.cvv = "***";
@@ -61,8 +61,8 @@ export default function AtmCard() {
       {!isVerified ? (
         <div
           className="
-            relative w-full h-60 rounded-lg
-            bg-main shadow-lg
+            relative w-full h-60
+            bg-main shadow-sm
             text-white
             flex flex-col justify-center items-center
             p-5 cursor-default select-none
@@ -149,11 +149,10 @@ export default function AtmCard() {
         cardData && (
           <div
             className="
-              w-full h-60 rounded-lg
+              w-full h-60
               bg-gradient-to-br from-main via-green-900 to-green-800
               text-green-200
               p-8
-              shadow-2xl
               font-mono font-semibold
               relative
               select-none

@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import axios from "../axiosInstance"; // adjust path
-import { toast} from "react-toastify";
+import axios from "../../../axiosInstance"; // adjust path
+import { toast } from "react-toastify";
 
 export default function VerifyEmailPage() {
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
   const [searchParams] = useSearchParams();
+  const executedRef = useRef(false); // ✅ persists across renders
 
   useEffect(() => {
+    if (executedRef.current) return; // ✅ run only once
+    executedRef.current = true;
+
     const token = searchParams.get("token");
     if (!token) {
       setStatus("error");
@@ -17,12 +21,10 @@ export default function VerifyEmailPage() {
       return;
     }
 
-    // Show loading toast
     const loadingToastId = toast.loading("Verifying your email, please wait...");
 
-    // Send verification request
     axios
-      .get(`/customer/verify?token=${token}`)
+      .get(`/auth/verify?token=${token}`)
       .then((res) => {
         setStatus("success");
         const successMsg = res.data || "Your email has been verified successfully!";
@@ -32,7 +34,8 @@ export default function VerifyEmailPage() {
       })
       .catch((err) => {
         setStatus("error");
-        const errorMsg = err.response?.data || "Verification failed. Token may be invalid or expired.";
+        const errorMsg =
+          err.response?.data || "Verification failed. Token may be invalid or expired.";
         setMessage(errorMsg);
         toast.dismiss(loadingToastId);
         toast.error(errorMsg);
@@ -40,7 +43,7 @@ export default function VerifyEmailPage() {
   }, [searchParams]);
 
   return (
-    <div className="h-[60vh] flex items-center justify-center bg-gray-100 p-4">
+    <div className="h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-8 w-[400px] h-[150px] flex flex-col justify-center items-center">
         {status === "loading" && (
           <>

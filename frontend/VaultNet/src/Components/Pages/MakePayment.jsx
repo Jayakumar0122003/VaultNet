@@ -1,15 +1,17 @@
+/* eslint-disable no-unused-vars */
 import React, { useState,useContext } from "react";
-import axios from "axios";
+import axios from "../../axiosInstance";
 import { IndianRupee } from "lucide-react";
 import { FaStarOfLife, FaUniversity } from "react-icons/fa";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-import MiniAtmService from "../MiniAtmService"
-import TransactionsPage from "./TransactionsPage";
-import SupportStrip from "../SupportStrip";
+import MiniAtmService from "../Pages/Payments/MiniAtmService"
+import TransactionsPage from "../Pages/Payments/TransactionsPage";
+import SupportStrip from "./Support/SupportStrip";
 import { AuthContext } from "../Context/AuthContext";
-import SetAtmPinPage from "../SetAtmPinPage";
+import SetAtmPinPage from "./AccountCreation/SetAtmPinPage";
 import Footer from "../Home/Footer";
+import { toast } from "react-toastify";
 
 export default function MakePaymentForm() {
   const [activeTab, setActiveTab] = useState("account");
@@ -30,6 +32,7 @@ export default function MakePaymentForm() {
   });
 
   const {loading,account} = useContext(AuthContext);
+  const accessToken = localStorage.getItem("accessToken");
 
   const handleChange = (e, type) => {
     if (type === "account") {
@@ -39,18 +42,65 @@ export default function MakePaymentForm() {
     }
   };
 
-  const handleSubmit = async (type) => {
-    try {
-      let url = type === "account" ? "/transfer-account" : "/transfer-card";
-      let payload = type === "account" ? accountForm : cardForm;
-      const { data } = await axios.post(url, payload);
-      alert(`Transaction Successful: ${JSON.stringify(data)}`);
-    } catch (err) {
-      alert(`Error: ${err.response?.data || err.message}`);
-    }
-  };
 
-  if (loading) {
+
+const handleSubmit = async (type) => {
+  // Show loading toast
+  const toastId = toast.loading("Processing your payment...");
+
+  try {
+    const url =
+      type === "account"
+        ? "/customer/transfer-account"
+        : "/customer/transfer-card";
+
+    const payload = type === "account" ? accountForm : cardForm;
+
+    const { data } = await axios.post(url, payload, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    // Update loading toast to success
+    toast.update(toastId, {
+      render: `Transaction Successful!`,
+      type: "success",
+      isLoading: false,
+      autoClose: 3000,
+    });
+
+    if (type === "account") {
+      setAccountForm({ senderAccountNumber: "", receiverAccountNumber: "", amount: "", pin: "" });
+    } else {
+      setCardForm({
+        cardNumber: "",
+        cardHolderName: "",
+        expiryDate: "",
+        cvv: "",
+        pin: "",
+        receiverAccountNumber: "",
+        amount: "",
+      });
+    }
+    
+    setTimeout(() => {
+        window.location.reload();
+        }, 1000);
+
+  } catch (err) {
+    // Update loading toast to error
+    toast.update(toastId, {
+      render: `Payment Failed: ${err.response?.data?.message || err.message}`,
+      type: "error",
+      isLoading: false,
+      autoClose: 4000,
+    });
+  }
+};
+
+
+  if (loading || !account) {
     return (
       <div className="flex items-center justify-center h-screen text-gray-600 dark:text-gray-300 dark:bg-gray-900">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 dark:border-white"></div>
@@ -68,6 +118,13 @@ export default function MakePaymentForm() {
 
       <h1 className=" text-xl font-bold px-5 md:px-20 py-5 pt-5 md:pt-10  text-gray-800 flex gap-0">{<IndianRupee className="w-7 h-7 pt-1 font-bold"/>}Money Transfer</h1>
       {/* Tabs */}
+      <p className="px-5 md:px-24 pb-10 text-xs italic text-gray-500">
+  ***Transferring money allows you to securely send funds to other accounts within 
+  the same bank or to different banks. Always verify the recipient’s account details 
+  before confirming the transfer, and avoid sharing your banking credentials or OTP 
+  with anyone. Ensure you are using a secure network to protect your transaction.***
+</p>
+
       <div className="flex mb-6 mx-5 md:mx-20">
         <button
           className={`px-4 py-2 font-medium transition uppercase text-xs ${
@@ -285,7 +342,10 @@ export default function MakePaymentForm() {
               <div className="bg-main py-5 text-xl font-semibold px-5 md:px-20 text-white uppercase ">
                 <h1>Mini ATM Service</h1>
               </div>
-              <div className="flex flex-col lg:flex-row justify-between gap-10 items-center py-10 md:py-20 lg:py-0 lg:px-40" >
+              <p className="px-5 md:px-24 text-xs italic text-gray-700 py-5">
+                ***Managing your finances is easy and secure with our withdrawal and deposit services. Whether you need cash for everyday expenses or want to add funds to your account, our platform ensures fast and reliable transactions. Always double-check your account details before confirming a withdrawal or deposit to avoid errors. For your safety, keep your banking credentials confidential and report any unauthorized transactions immediately. Our goal is to provide you with convenient access to your money anytime, anywhere.***
+              </p>
+              <div className="flex flex-col lg:flex-row justify-between gap-10 items-center py-10 md:py-20 lg:py-10 lg:pt-0 lg:px-64" >
                 <h1 className="flex flex-col justify-center items-center text-3xl lg:text-5xl font-bold text-main uppercase">{<FaUniversity className="text-center text-5xl md:text-8xl"/>}VaultNet Bank</h1>
                 <MiniAtmService/>
               </div>
