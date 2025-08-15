@@ -22,7 +22,15 @@ import OneTimeRoute from "./Components/PrivateRoutes/OneTimeRoute";
 import PublicRoute from "./Components/PrivateRoutes/PublicRoute";
 import AccountRoute from "./Components/PrivateRoutes/AccountRoute";
 import NotFoundPage from "./Components/Auth/NotFoundPage";
+import RoleRoute from "./Components/PrivateRoutes/RoleRoute"
+import UnauthorizedPage from "./Components/Auth/UnauthorizedPage";
+
+
+// Admin 
 import AdminAuthPage from "./Components/Auth/AdminAuthPage";
+import AdminAccountDetails from "./Components/Admin/AdminAccountDetails";
+import AdminTicketsView from "./Components/Admin/AdminTicketsView"
+import AdminUnblockCard from "./Components/Admin/AdminUnblockCard";
 
 export default function AppRoutes() {
   const { user, account } = useContext(AuthContext);
@@ -32,6 +40,8 @@ export default function AppRoutes() {
       {/* Public */}
       <Route path="/" element={<Home />} />
        <Route path="*" element={<NotFoundPage/>} />
+       <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
       <Route 
     path="/vaultnet-authenticate" 
     element={
@@ -50,7 +60,9 @@ export default function AppRoutes() {
         path="/vaultnet-bank-account"
         element={
           <AccountRoute>
-            <CreateAccountPage />
+            <RoleRoute allowedRoles={["CUSTOMER"]}>
+               <CreateAccountPage />
+            </RoleRoute>
           </AccountRoute>
         }
       />
@@ -58,7 +70,9 @@ export default function AppRoutes() {
         path="/vaultnet-make-payments"
         element={
           <PrivateRoute>
-            <Payments />
+            <RoleRoute allowedRoles={["CUSTOMER"]}>
+              <Payments />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -66,7 +80,9 @@ export default function AppRoutes() {
         path="/vaultnet-account-details-config"
         element={
           <PrivateRoute>
-            <Account />
+            <RoleRoute allowedRoles={["CUSTOMER"]}>
+              <Account />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -74,7 +90,9 @@ export default function AppRoutes() {
         path="/vaultnet-customer-support-care"
         element={
           <PrivateRoute>
-            <Support />
+            <RoleRoute allowedRoles={["CUSTOMER"]}>
+              <Support />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -83,7 +101,9 @@ export default function AppRoutes() {
         path="/vaultnet-forgot-atm-pin"
         element={
           <PrivateRoute>
-            <ForgotPin/>
+            <RoleRoute allowedRoles={["CUSTOMER"]}>
+               <ForgotPin/>
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -93,7 +113,9 @@ export default function AppRoutes() {
         path="/vaultnet-set-atm-pin"
         element={
           <OneTimeRoute condition={account?.pinSet} redirectTo="/">
-            <SetAtmPinPage />
+            <RoleRoute allowedRoles={["CUSTOMER"]}>
+               <SetAtmPinPage />
+              </RoleRoute>
           </OneTimeRoute>
         }
       />
@@ -101,20 +123,52 @@ export default function AppRoutes() {
         path="/vaultnet-verify-account"
         element={
           <OneTimeRoute condition={user?.emailVerified} redirectTo="/">
-            <VerifyEmailPage />
+             <RoleRoute allowedRoles={["CUSTOMER"]}>
+               <VerifyEmailPage />
+              </RoleRoute>
           </OneTimeRoute>
         }
       />
       {/* -------------------------------------------------------------------------------------------- */}
 
       <Route 
-    path="/vaultnet-authenticate-admin" 
-    element={
-      <PublicRoute>
-        <AdminAuthPage/>
-      </PublicRoute>
-    } 
-  />
+        path="/vaultnet-authenticate-admin" 
+        element={
+          <PublicRoute>
+            <AdminAuthPage/>
+          </PublicRoute>
+        } 
+      />
+      <Route
+      path="/vaultnet-admin-profile-details"
+      element={
+        <AccountRoute>
+          <RoleRoute allowedRoles={["ADMIN"]}>
+            <AdminAccountDetails/>
+          </RoleRoute>
+        </AccountRoute>
+      }
+      />
+      <Route
+      path="/vaultnet-admin-tickets-view"
+      element={
+        <AccountRoute>
+          <RoleRoute allowedRoles={["ADMIN"]}>
+            <AdminTicketsView/>
+          </RoleRoute>
+        </AccountRoute>
+      }
+      />
+      <Route
+      path="/vaultnet-admin-unblock-card"
+      element={
+        <AccountRoute>
+          <RoleRoute allowedRoles={["ADMIN"]}>
+            <AdminUnblockCard/>
+          </RoleRoute>
+        </AccountRoute>
+      }
+      />
 
     </Routes>
   );

@@ -74,9 +74,41 @@ public class DebitCardService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setTo(email);
-            helper.setSubject("🎉 Your Virtual Debit Card is Ready!");
-            helper.setText("Hi " + fullName + ",\n\nYour encrypted virtual debit card is attached.\n\n" +
-                    "Password: First 4 letters of your name (CAPITAL) + last 4 digits of your phone number.\n\nUse it safely!");
+            helper.setSubject("💳 Your Encrypted Virtual Debit Card is Ready to Use!");
+            helper.setText(
+                    "<!DOCTYPE html>" +
+                            "<html>" +
+                            "<head>" +
+                            "<meta charset='UTF-8'>" +
+                            "<style>" +
+                            "  body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }" +
+                            "  .container { background: #ffffff; max-width: 600px; margin: 20px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }" +
+                            "  .header { background-color: #007bff; color: white; padding: 20px; text-align: center; font-size: 20px; }" +
+                            "  .content { padding: 20px; color: #333333; line-height: 1.6; }" +
+                            "  .highlight { background-color: #f0f8ff; padding: 10px; border-left: 4px solid #007bff; font-weight: bold; }" +
+                            "  .footer { text-align: center; font-size: 12px; color: #777; padding: 15px; background: #fafafa; }" +
+                            "</style>" +
+                            "</head>" +
+                            "<body>" +
+                            "  <div class='container'>" +
+                            "    <div class='header'>💳 Your Virtual Debit Card is Ready!</div>" +
+                            "    <div class='content'>" +
+                            "      <p>Hello <strong>" + fullName + "</strong>,</p>" +
+                            "      <p>We’re excited to inform you that your <strong>secure, encrypted Virtual Debit Card</strong> is now ready for use! 🎉</p>" +
+                            "      <div class='highlight'>" +
+                            "        🔐 Password: First 4 letters of your first name (UPPERCASE) + last 4 digits of your phone number." +
+                            "      </div>" +
+                            "      <p>📎 Your card is attached to this email.</p>" +
+                            "      <p>💡 <em>Tip:</em> Keep your password safe and never share it with anyone.</p>" +
+                            "      <p>Enjoy safe and secure spending!</p>" +
+                            "      <p>— Your Bank Security Team</p>" +
+                            "    </div>" +
+                            "    <div class='footer'>© 2025 Your Bank. All rights reserved.</div>" +
+                            "  </div>" +
+                            "</body>" +
+                            "</html>",
+                    true // <-- this is important to send HTML email
+            );
 
             ByteArrayResource pdfAttachment = new ByteArrayResource(baos.toByteArray());
             helper.addAttachment("VirtualDebitCard.pdf", pdfAttachment);
@@ -178,11 +210,41 @@ public class DebitCardService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setTo(debitCard.getEmail());
-            helper.setSubject("🎉 Your Virtual Debit Card is Ready!");
-            helper.setText("Hi " + debitCard.getCardHolderName() + ",\n\n" +
-                    "Your encrypted virtual debit card is attached.\n\n" +
-                    "Password: First 4 letters of your name (CAPITAL) + last 4 digits of your phone number.\n\nUse it safely!");
-
+            helper.setSubject("💳 Your Encrypted Virtual Debit Card is Ready to Use!");
+            helper.setText(
+                    "<!DOCTYPE html>" +
+                            "<html>" +
+                            "<head>" +
+                            "<meta charset='UTF-8'>" +
+                            "<style>" +
+                            "  body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }" +
+                            "  .container { background: #ffffff; max-width: 600px; margin: 20px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }" +
+                            "  .header { background-color: #007bff; color: white; padding: 20px; text-align: center; font-size: 20px; }" +
+                            "  .content { padding: 20px; color: #333333; line-height: 1.6; }" +
+                            "  .highlight { background-color: #f0f8ff; padding: 10px; border-left: 4px solid #007bff; font-weight: bold; }" +
+                            "  .footer { text-align: center; font-size: 12px; color: #777; padding: 15px; background: #fafafa; }" +
+                            "</style>" +
+                            "</head>" +
+                            "<body>" +
+                            "  <div class='container'>" +
+                            "    <div class='header'>💳 Your Virtual Debit Card is Ready!</div>" +
+                            "    <div class='content'>" +
+                            "      <p>Hello <strong>" + firstName + "</strong>,</p>" +
+                            "      <p>We’re excited to inform you that your <strong>secure, encrypted Virtual Debit Card</strong> is now ready for use! 🎉</p>" +
+                            "      <div class='highlight'>" +
+                            "        🔐 Password: First 4 letters of your first name (UPPERCASE) + last 4 digits of your phone number." +
+                            "      </div>" +
+                            "      <p>📎 Your card is attached to this email.</p>" +
+                            "      <p>💡 <em>Tip:</em> Keep your password safe and never share it with anyone.</p>" +
+                            "      <p>Enjoy safe and secure spending!</p>" +
+                            "      <p>— Your Bank Security Team</p>" +
+                            "    </div>" +
+                            "    <div class='footer'>© 2025 Your Bank. All rights reserved.</div>" +
+                            "  </div>" +
+                            "</body>" +
+                            "</html>",
+                    true // <-- this is important to send HTML email
+            );
             ByteArrayResource pdfAttachment = new ByteArrayResource(baos.toByteArray());
             helper.addAttachment("VirtualDebitCard.pdf", pdfAttachment);
 

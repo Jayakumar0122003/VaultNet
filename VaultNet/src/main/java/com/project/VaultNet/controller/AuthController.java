@@ -68,6 +68,13 @@ public class AuthController {
             Users user = userService.getUserByEmail(request.getEmail())
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+            // Check role match
+            if (request.getExpectedRole() != null &&
+                    user.getRole() != Role.valueOf(request.getExpectedRole().toUpperCase())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "You are not authorized to log in here."));
+            }
+
             // Generate tokens
             String accessToken = jwtService.generateToken(user, 1000L * 60 * 15);
             String refreshToken = jwtService.generateToken(user, 1000L * 60 * 60 * 24 * 7);
@@ -78,7 +85,7 @@ public class AuthController {
             // Create refresh token cookie
             ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
-                    .secure(false)      // set true in production
+                    .secure(false) // set true in production
                     .sameSite("Lax")
                     .path("/")
                     .maxAge(7 * 24 * 60 * 60)
@@ -92,21 +99,19 @@ public class AuthController {
             ));
 
         } catch (BadCredentialsException ex) {
-            // Invalid email/password
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Login failed: Please check your credential!"));
+                    .body(Map.of("error", "Login failed: Please check your credentials!"));
 
         } catch (ResourceNotFoundException ex) {
-            // User not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", ex.getMessage()));
 
         } catch (Exception ex) {
-            // Any other exception
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "An error occurred: " + ex.getMessage()));
         }
     }
+
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {

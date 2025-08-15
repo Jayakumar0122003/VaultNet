@@ -7,7 +7,7 @@ import { MdEmail } from "react-icons/md";
 
 
 
-export default function AccountDetailsUpdate() {
+export default function AdminAccountDetailsUpdate() {
   const [activeTab, setActiveTab] = useState("email");
   const [emailForm, setEmailForm] = useState({ lastFourDigits: "", email: "" });
   const [phoneStep, setPhoneStep] = useState(1);
@@ -32,7 +32,7 @@ const handleSubmitEmail = async (e) => {
   const loadingToast = toast.loading("Updating email...");
   try {
     const res = await axios.put(
-      "/customer/change-email",
+      "/admin/change-email",
       {
         lastFourDigits: emailForm.lastFourDigits,
         email: emailForm.email,
@@ -44,7 +44,7 @@ const handleSubmitEmail = async (e) => {
       }
     );
 
-    // ✅ Check backend's success flag
+    // Check backend's success flag
     if (!res.data?.success) {
       toast.update(loadingToast, {
         render: res.data?.message || "Failed to update email",
@@ -61,6 +61,8 @@ const handleSubmitEmail = async (e) => {
       isLoading: false,
       autoClose: 3000,
     });
+
+    setEmailForm({ lastFourDigits: "", email: "" });
 
     setTimeout(() => {
       window.location.reload();
@@ -89,7 +91,7 @@ const handleSendOtp = async (e) => {
   const loadingToast = toast.loading("Sending OTP...");
   try {
     const res = await axios.put(
-      "/customer/change-phone",
+      "/admin/change-phone",
       { email: phoneForm.email },
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
@@ -123,7 +125,7 @@ const handleVerifyPhone = async (e) => {
   const loadingToast = toast.loading("Verifying phone number...");
   try {
   const res = await axios.post(
-    "/customer/verify-otp-phone",
+    "/admin/verify-otp-phone",
     {
       newPhoneNumber: verifyForm.newPhoneNumber,
       otp: verifyForm.otp,
@@ -141,7 +143,6 @@ const handleVerifyPhone = async (e) => {
       });
       return;
     }
-
   toast.update(loadingToast, {
     render: res.data?.message || "Phone number updated successfully!",
     type: "success",
@@ -324,12 +325,23 @@ const handleVerifyPhone = async (e) => {
               </div>
               <div></div>
             </div>
-            <div className="flex justify-center">
+             <div className="flex justify-end px-14 gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                 setPhoneStep(1);
+                  setPhoneForm({ email: "" });
+                  setVerifyForm({ newPhoneNumber: "", otp: "" });
+                }}
+                className="w-full md:w-[40%] lg:w-[30%] bg-gray-200 text-gray-800 py-2 cursor-pointer hover:bg-gray-300 duration-300 uppercase"
+              >
+                Cancel
+              </button>
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[25%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className="w-full md:w-[40%] lg:w-[30%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
               >
-                Verify & Update Phone
+                Verify & Update Phone Number
               </button>
             </div>
           </form>

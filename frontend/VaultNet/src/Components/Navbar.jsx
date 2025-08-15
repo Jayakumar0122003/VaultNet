@@ -11,12 +11,16 @@ import { TbListDetails } from "react-icons/tb";
 import { BiSupport } from "react-icons/bi";
 import { FaUserCircle } from "react-icons/fa";
 import { AiFillHome } from "react-icons/ai";
+import { IoTicketSharp } from "react-icons/io5";
+import { ImProfile } from "react-icons/im";
+
 
 
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout, loading } = useContext(AuthContext);
+  const { user, logout, loading, role } = useContext(AuthContext);
+  const [change, setChange] = useState(false);
 
    const location = useLocation();
   if (location.pathname === "/vaultnet-verify-account") {
@@ -31,10 +35,16 @@ export default function Navbar() {
 
   ];
 
+  const adminLinks =[
+    {name: "Card Requests", path: "/vaultnet-admin-unblock-card", icon: <MdPayment className="text-xl"/> },
+    {name: "Tickets", path: "/vaultnet-admin-tickets-view", icon: <IoTicketSharp className="text-xl"/> },
+    {name: "Profile", path: "/vaultnet-admin-profile-details", icon: <ImProfile className="text-xl"/> }
+  ]
+
   const navLinkClass = ({ isActive }) =>
     `relative font-medium transition duration-300 flex gap-2 items-center justify-center ${
       isActive
-        ? "text-main after:absolute after:bottom-[-6px] after:left-0 after:w-full after:h-[2px] after:bg-main"
+        ? "text-main after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[2px] after:bg-main "
         : "text-gray-700 hover:text-main"
     }`;
 
@@ -43,7 +53,7 @@ export default function Navbar() {
   }  
 
   return (
-    <nav className="w-full bg-gray-50 shadow-lg top-0 left-0 z-50 border-b border-gray-100">
+    <nav className="w-full bg-gray-50 top-0 left-0 z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <NavLink
@@ -55,15 +65,33 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <>
-        {user ? <div className="hidden lg:flex items-center gap-6 lg:gap-14 text-sm">
-          {navLinks.map((link) => (
-            <NavLink key={link.name} to={link.path} className={navLinkClass}>
-              {link.icon}{link.name}
-            </NavLink>
-          ))}
-        </div>:
-        <></>}
+          {role === "CUSTOMER" ? (
+            user ? (
+              <div className="hidden lg:flex items-center gap-6 lg:gap-14 text-sm">
+                {navLinks.map((link) => (
+                  <NavLink key={link.name} to={link.path} className={navLinkClass}>
+                    {link.icon}
+                    {link.name}
+                  </NavLink>
+                ))}
+              </div>
+            ) : (
+              <></>
+            )
+          ) : user ? (
+            <div className="hidden lg:flex items-center gap-6 lg:gap-14 text-sm">
+              {adminLinks.map((link) => (
+                <NavLink key={link.name} to={link.path} className={navLinkClass}>
+                  {link.icon}
+                  {link.name}
+                </NavLink>
+              ))}
+            </div>
+          ) : (
+            <></>
+          )}
         </>
+
 
         {/* Right Actions */}
         <div className="hidden lg:flex items-center gap-7">
@@ -81,16 +109,43 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <NavLink to="/vaultnet-authenticate?mode=login" className={navLinkClass}>
-                <FaUserCircle className="text-xl"/>Login
-              </NavLink>
-              <NavLink
-                to="/vaultnet-authenticate?mode=signup"
-                className="bg-main text-white px-5 py-2 rounded-full shadow-md transition hover:opacity-80 duration-300"
-              >
-                Get Started
-              </NavLink>
-            </>
+            {change ? (
+              <>
+                <NavLink to="/vaultnet-authenticate?mode=login" className={navLinkClass}>
+                  Login
+                </NavLink>
+
+                <NavLink
+                  to="/vaultnet-authenticate?mode=signup"
+                  className="bg-main text-white px-5 py-2 rounded-full shadow-md transition hover:opacity-80 duration-300"
+                >
+                  Get Started
+                </NavLink>
+
+                <NavLink to="/vaultnet-authenticate-admin" className={navLinkClass} onClick={()=> setChange(!change)}>
+                  <FaUserCircle className="text-xl" /> Admin Portal
+                </NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink to="/vaultnet-authenticate-admin?mode=login" className={navLinkClass}>
+                  Login
+                </NavLink>
+
+                <NavLink
+                  to="/vaultnet-authenticate-admin?mode=signup"
+                  className="bg-main text-white px-5 py-2 rounded-full shadow-md transition hover:opacity-80 duration-300"
+                >
+                  Get Started
+                </NavLink>
+
+                <NavLink to="/vaultnet-authenticate" className={navLinkClass} onClick={()=>setChange(!change)}> 
+                  <FaUserCircle className="text-xl" /> User Portal
+                </NavLink>
+              </>
+            )}
+          </>
+
           )}
         </div>
 
@@ -120,16 +175,29 @@ export default function Navbar() {
         </div>
         <div className="px-6 py-4 space-y-4">
           {user ? <>
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.name}
-              to={link.path}
-              className=" text-gray-700 font-medium hover:text-main transition flex gap-2 items-center"
-              onClick={() => setIsOpen(false)}
-            >
-              {link.icon}{link.name}
-            </NavLink>
-          ))}
+          {role === "CUSTOMER"
+            ? navLinks.map((link) => (
+                <NavLink
+                  key={link.name}
+                  to={link.path}
+                  className="text-gray-700 font-medium hover:text-main transition flex gap-2 items-center"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.icon}
+                  {link.name}
+                </NavLink>
+              ))
+            : adminLinks.map((link) => (
+                <NavLink
+                  key={link.name}
+                  to={link.path}
+                  className="text-gray-700 font-medium hover:text-main transition flex gap-2 items-center"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.icon}
+                  {link.name}
+                </NavLink>
+              ))}
           <hr className="my-4 text-gray-300" />
           </>:<></>}
           {user ? (
@@ -149,27 +217,24 @@ export default function Navbar() {
             </>
           ) : (
             <>
-            <NavLink
-                to="/"
-                className="text-gray-700 font-medium hover:text-main transition text-center uppercase flex items-center gap-2"
-                onClick={() => setIsOpen(false)}
-              >
-                <AiFillHome className="text-xl"/>Home
-              </NavLink>
-              <NavLink
-                to="/vaultnet-authenticate?mode=login"
-                className="text-gray-700 font-medium hover:text-main transition text-center uppercase flex items-center gap-2"
-                onClick={() => setIsOpen(false)}
-              >
-                <FaUserCircle className="text-lg"/>Login
-              </NavLink>
-              <NavLink
-                to="/vaultnet-authenticate?mode=signup"
-                className="block bg-main text-white text-center py-2 rounded-full hover:opacity-80 duration-300 hover:text-black shadow-md transition"
-                onClick={() => setIsOpen(false)}
-              >
-                Get Started
-              </NavLink>
+                <NavLink
+                  to="/"
+                  className="text-gray-700 font-medium hover:text-main transition text-center uppercase flex items-center gap-2 justify-center"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <AiFillHome className="text-xl" /> Home
+                </NavLink>
+
+                  <NavLink
+                    to={change ? "/vaultnet-authenticate": "/vaultnet-authenticate-admin"}
+                    className={navLinkClass}
+                    onClick={() => {
+                      setChange(!change);
+                      setIsOpen(false);
+                    }}
+                  >
+                    <FaUserCircle className="text-xl" />  {change ? "User Portal" : "Admin Portal"}
+                  </NavLink>
             </>
           )}
         </div>

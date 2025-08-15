@@ -23,7 +23,7 @@ export default function AdminAuthPage() {
     }
   }, [location.search]);
 
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [loginData, setLoginData] = useState({ email: "", password: "" , expectedRole: "ADMIN"});
   const [signupData, setSignupData] = useState({
     fullName: "",
     email: "",
@@ -43,34 +43,55 @@ export default function AdminAuthPage() {
     setSignupData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLoginSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      toast.loading("Logging in...");
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        loginData,
-        { withCredentials: true }
-      );
-      toast.dismiss();
-      toast.success("Admin login successful!", { position: "top-right", autoClose: 3000 });
+const handleLoginSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-      console.log("Admin Login Response:", response.data);
-      login(response.data.accessToken, response.data.role);
-      setLoginData({ email: "", password: "" });
-      navigate("/"); // redirect to admin dashboard
-    } catch (error) {
-      toast.dismiss();
-      toast.error(error.response?.data?.error || "Login failed.", {
-        position: "top-right",
-        autoClose: 3000,
+  try {
+    toast.loading("Logging in...");
+
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/login",
+      loginData,
+      { withCredentials: true }
+    );
+
+    toast.dismiss();
+
+    if (response.status === 200) {
+      toast.success("Login successful!", { autoClose: 3000 });
+
+      login({
+        accessToken: response.data.accessToken,
+        role: response.data.role
       });
-      console.error("Admin Login Error:", error);
-    } finally {
-      setIsSubmitting(false);
+
+      setLoginData({ email: "", password: "" });
+      navigate("/");
     }
-  };
+
+  } catch (error) {
+    toast.dismiss();
+
+    // Extract message from backend or fallback
+    const message = error.response?.data?.error || "Login failed. Please try again.";
+
+    // Show based on status code
+    if (error.response?.status === 403) {
+      toast.error("You are not authorized to log in here.");
+    } else if (error.response?.status === 401) {
+      toast.error("Invalid email or password.");
+    } else if (error.response?.status === 404) {
+      toast.error("User not found.");
+    } else {
+      toast.error(message);
+    }
+
+    console.error("Login Error:", error);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
@@ -126,23 +147,23 @@ export default function AdminAuthPage() {
   return (
     <div className="h-full md:h-screen lg:h-[92vh] flex flex-col lg:flex-row border-b-1 border-sec">
       {/* Left Illustration */}
-      <div className="lg:w-1/3 bg-main flex justify-center items-center p-8">
-        <div className="text-center text-white">
+      <div className="lg:w-1/3 bg-white flex justify-center items-center p-8">
+        <div className="text-center text-main">
           <h1 className="text-5xl font-bold mb-4 uppercase">Admin Portal</h1>
           <p className="text-base opacity-90">
             Manage VaultNet securely and efficiently.
           </p>
-          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 mt-0 ml-12 md:ml-32 lg:ml-8 lg:mt-3" />
+          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 mt-0 ml-12 md:ml-32 lg:ml-3 lg:mt-3" />
         </div>
       </div>
 
       {/* Right Form Section */}
-      <div className="lg:w-full flex justify-center items-center bg-gray-50 p-6 h-full lg:h-full">
+      <div className="lg:w-full flex justify-center items-center bg-sec p-6 h-full lg:h-full">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className={`bg-white backdrop-blur-lg p-8 rounded-sm shadow-lg lg:shadow-xl w-full max-w-sm ${
+          className={`bg-white backdrop-blur-lg p-8 shadow-lg lg:shadow-xl w-full max-w-sm ${
             isLogin ? `lg:max-w-2xl` : `lg:max-w-5/6`
           }`}
         >

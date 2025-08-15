@@ -5,6 +5,8 @@ import com.project.VaultNet.customexceptions.ResourceNotFoundException;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationRequest;
 import com.project.VaultNet.dto.AccountCreation.AccountCreationResponse;
 import com.project.VaultNet.dto.AccountCreation.UserProfileDTO;
+import com.project.VaultNet.dto.Admin.AdminDetailResponse;
+import com.project.VaultNet.dto.Admin.AdminDetailsChange;
 import com.project.VaultNet.dto.AuthDto.*;
 import com.project.VaultNet.dto.ChangeEmail.*;
 import com.project.VaultNet.dto.cardPinDto.*;
@@ -12,10 +14,7 @@ import com.project.VaultNet.dto.details.AccountDetails;
 import com.project.VaultNet.dto.details.AccountDetailsResponse;
 import com.project.VaultNet.dto.details.DebitCardDetails;
 import com.project.VaultNet.dto.details.DebitCardDetailsRequest;
-import com.project.VaultNet.model.Address;
-import com.project.VaultNet.model.DebitCard;
-import com.project.VaultNet.model.SupportTicket;
-import com.project.VaultNet.model.Users;
+import com.project.VaultNet.model.*;
 import com.project.VaultNet.repository.DebitCardRepository;
 import com.project.VaultNet.repository.SupportTicketRepository;
 import com.project.VaultNet.repository.UserRepository;
@@ -421,8 +420,12 @@ public class UserService {
                 return new ChangeEmailResponse("Please enter your phone number last digits!",false);
             }
 
-            DebitCard debitCard = debitCardRepository.findByEmail(user.getEmail())
-                    .orElseThrow(() -> new ResourceNotFoundException("No debit card found with the provided digits!"));
+            if(user.getRole() == Role.CUSTOMER){
+                DebitCard debitCard = debitCardRepository.findByEmail(user.getEmail())
+                        .orElseThrow(() -> new ResourceNotFoundException("No debit card found with the provided digits!"));
+                debitCard.setEmail(request.getEmail());
+                debitCardRepository.save(debitCard);
+            }
 
             if (user.getEmail().equalsIgnoreCase(request.getEmail())) {
                 return new ChangeEmailResponse("New email cannot be same as old email", false);
@@ -431,11 +434,9 @@ public class UserService {
             List<SupportTicket> supportTicketList = supportTicketRepository.findByUserTicket_Id(user.getId());
 
             user.setEmail(request.getEmail());
-            debitCard.setEmail(request.getEmail());
             supportTicketList.forEach(ticket -> ticket.setEmail(request.getEmail()));
 
             userRepository.save(user);
-            debitCardRepository.save(debitCard);
             supportTicketRepository.saveAll(supportTicketList);
 
             return new ChangeEmailResponse("Email updated successfully", true);
@@ -451,11 +452,14 @@ public class UserService {
 
 
 
-    public GenericResponse initiatePhoneChange(ChangePhoneRequest request) {
+    public GenericResponse initiatePhoneChange(ChangePhoneRequest request, Principal principal) {
         try {
-            Users user = userRepository.findByEmail(request.getEmail())
+            Users user = userRepository.findByEmail(principal.getName())
                     .orElseThrow(() -> new ResourceNotFoundException("Provide register email address!"));
 
+            if (!user.getEmail().equalsIgnoreCase(request.getEmail())) {
+                return new GenericResponse("Invalid Email Address!", false);
+            }
             // Generate 6-digit OTP
             String otp = String.format("%06d", new Random().nextInt(999_999));
             LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
@@ -481,11 +485,15 @@ public class UserService {
             Users user = userRepository.findByEmail(principal.getName())
                     .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
 
-            DebitCard debitCard = debitCardRepository.findByEmail(user.getEmail())
-                    .orElseThrow(() -> new ResourceNotFoundException("Associated debit card not found!"));
-
             if(userRepository.existsByPhone(request.getNewPhoneNumber())){
                 return new GenericResponse("Phone number already exit!", false);
+            }
+
+            if(user.getRole() == Role.CUSTOMER){
+                DebitCard debitCard = debitCardRepository.findByEmail(user.getEmail())
+                        .orElseThrow(() -> new ResourceNotFoundException("Associated debit card not found!"));
+                debitCard.setPhone(request.getNewPhoneNumber());
+                debitCardRepository.save(debitCard);
             }
 
             // Validate OTP
@@ -498,7 +506,6 @@ public class UserService {
             }
 
             // Update phone number
-            debitCard.setPhone(request.getNewPhoneNumber());
             user.setPhone(request.getNewPhoneNumber());
 
             // Clear OTP
@@ -507,7 +514,6 @@ public class UserService {
 
             // Save changes
             userRepository.save(user);
-            debitCardRepository.save(debitCard);
 
             return new GenericResponse("Phone number successfully changed!", true);
 
@@ -715,5 +721,77 @@ public class UserService {
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+    public AdminDetailResponse getAdminDetails(Principal principal) {
+        Users users = userRepository.findByEmail(principal.getName())
+                .orElseThrow(()-> new ResourceNotFoundException("User not found!"));
+        AdminDetailResponse response = new AdminDetailResponse(
+                users.getId(),
+                users.getEmail(),
+                users.getUsername(),
+                users.getRole(),
+                users.getFirstName(),
+                users.getLastName(),
+                users.getPhone(),
+                users.getAddress(),
+                users.getDob(),
+                users.isEmailVerified(),
+                users.getVerificationLink(),
+                users.getCreatedAt()
+        );
+
+        return response;
+    }
+
+    public GenericResponse verifyOtpAndChangeDetails(AdminDetailsChange request, Principal principal) {
+        try {
+            Users user = userRepository.findByEmail(principal.getName())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            if (!request.getOtp().equals(user.getResetOtp())) {
+                return new GenericResponse("Invalid or expired OTP", false);
+            }
+
+            if (user.getResetOtpExpiresAt().isBefore(LocalDateTime.now())) {
+                return new GenericResponse("OTP expired", false);
+            }
+
+            user.setFirstName(request.getFirstName());
+            user.setLastName(request.getLastName());
+            user.setPhone(request.getPhone());
+
+            // Update address
+            Address address = new Address();
+            address.setAddressLine(request.getAddressLine());
+            address.setCity(request.getCity());
+            address.setState(request.getState());
+            address.setPostalCode(request.getPostalCode());
+            user.setAddress(address);
+
+            // Clear OTP
+            user.setResetOtp(null);
+            user.setResetOtpExpiresAt(null);
+
+            userRepository.save(user);
+
+            return new GenericResponse("Address details successfully updated!", true);
+
+        } catch (ResourceNotFoundException e) {
+            throw e; // handled in controller → 404
+        } catch (Exception e) {
+            System.err.println("Failed to verify OTP and update address for user " + principal.getName() + ": " + e.getMessage());
+            throw new RuntimeException("An unexpected error occurred while updating address.", e);
+        }
+    }
 }
 

@@ -2,13 +2,18 @@ import { useState, useEffect } from "react";
 import axios from "../../axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
-import {toast} from "react-toastify"
+import { toast } from "react-toastify";
 
 export function AuthProvider({ children }) {
   const navigate = useNavigate();
 
-  const [accessToken, setAccessToken] = useState(() => localStorage.getItem("accessToken"));
-  const [role, setRole] = useState(() => localStorage.getItem("role"));
+  // Initial state: get from localStorage if available
+  const [accessToken, setAccessToken] = useState(() =>
+    localStorage.getItem("accessToken") || null
+  );
+  const [role, setRole] = useState(() =>
+    localStorage.getItem("role") || null
+  );
   const [user, setUser] = useState(null);
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,40 +27,67 @@ export function AuthProvider({ children }) {
     }
   }, [accessToken]);
 
-  // Fetch user details when logged in
+  // Fetch user/admin data
   useEffect(() => {
-    if (accessToken) {
-      fetchUserDetails();
-    } else {
+    if (!accessToken) {
       setUser(null);
+      setRole(null);
       setAccount(null);
       setLoading(false);
+      return;
     }
-  }, [accessToken]);
 
-  // Fetch account details when user is verified
-  useEffect(() => {
-    if (user?.emailVerified) {
-      fetchAccountDetails();
-    } else {
-      setAccount(null);
+    const fetchUserData = async () => {
+      setLoading(true);
+      try {
+        if (role === "CUSTOMER") {
+          const resUser = await axios.get("/customer/get-account");
+          setUser(resUser.data.data);
+          setRole(resUser.data.data.role); // ensure role comes from API
+          if (resUser.data.data.emailVerified) {
+            const resAccount = await axios.get("/customer/account");
+            setAccount(resAccount.data.data);
+          }
+        } else if (role === "ADMIN") {
+          const resAdmin = await axios.get("/admin/get-user");
+          setUser(resAdmin.data);
+          setRole(resAdmin.data.role); // ensure role comes from API
+          setAccount(null);
+        }
+      } catch (err) {
+        console.error("Fetch failed", err);
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [accessToken, role]);
+
+  // Login: receive accessToken + role from server
+  const login = ({ accessToken, role }) => {
+    if (!accessToken || !role) {
+      console.error("Login: accessToken or role missing!");
+      return;
     }
-  }, [user]);
 
-  const login = (token, userRole) => {
-    setAccessToken(token);
-    setRole(userRole);
-    localStorage.setItem("accessToken", token);
-    localStorage.setItem("role", userRole);
-    navigate("/");
+    setAccessToken(accessToken);
+    setRole(role);
+
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("role", role);
+
+    navigate("/"); // redirect after login
   };
 
+  // Logout
   const logout = async () => {
     try {
-      toast.loading("Exiting...")
+      toast.loading("Exiting...");
       await axios.post("/auth/logout", {}, { withCredentials: true });
       toast.dismiss();
-      toast.success("Exit Successfull! ")
+      toast.success("Exit Successful!");
     } catch (err) {
       toast.dismiss();
       console.error("Error logging out:", err);
@@ -63,34 +95,10 @@ export function AuthProvider({ children }) {
       setAccessToken(null);
       setRole(null);
       setUser(null);
+      setAccount(null);
       localStorage.removeItem("accessToken");
       localStorage.removeItem("role");
       navigate("/vaultnet-authenticate");
-    }
-  };
-
-  const fetchUserDetails = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get("/customer/get-account");
-      setUser(res.data.data);
-      console.log(res);
-    } catch (err) {
-      logout();
-      console.error("User fetch failed", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchAccountDetails = async () => {
-    try {
-      const res = await axios.get("/customer/account");
-      setAccount(res.data.data);
-      console.log(res);
-    } catch (err) {
-      console.error("Account fetch failed", err);
-      logout();
     }
   };
 

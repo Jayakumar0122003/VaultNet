@@ -29,7 +29,7 @@ export default function AuthPageCreative() {
     }
   }, [location.search]);
 
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [loginData, setLoginData] = useState({ email: "", password: "",expectedRole: "CUSTOMER" });
   const [signupData, setSignupData] = useState({
     fullName: "",
     email: "",
@@ -49,45 +49,56 @@ export default function AuthPageCreative() {
     setSignupData((prev) => ({ ...prev, [name]: value }));
   };
 
-    const handleLoginSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+const handleLoginSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    try {
-      toast.loading("Wait Logging...")
-      // API request
-      const response = await axios.post("http://localhost:8080/api/auth/login", loginData,{withCredentials: true});
-      toast.dismiss();
-      // Show success toast
-      toast.success("Login successful!", {
-        position: "top-right",
-        autoClose: 3000,
+  try {
+    toast.loading("Logging in...");
+
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/login",
+      loginData,
+      { withCredentials: true }
+    );
+
+    toast.dismiss();
+
+    if (response.status === 200) {
+      toast.success("Login successful!", { autoClose: 3000 });
+
+      login({
+        accessToken: response.data.accessToken,
+        role: response.data.role
       });
 
-      console.log("Login Response:", response.data);
-
-      login(response.data.accessToken,response.data.role)
-      
-      // Reset form
       setLoginData({ email: "", password: "" });
-
-      navigate("/")
-
-    } catch (error) {
-      toast.dismiss();
-      // Show error toast
-      toast.error(
-        error.response?.data?.error || "Login failed. Please try again.",
-        {
-          position: "top-right",
-          autoClose: 3000,
-        }
-      );
-      console.error("Login Error:", error);
-    }finally{
-      setIsSubmitting(false);
+      navigate("/");
     }
-  };
+
+  } catch (error) {
+    toast.dismiss();
+
+    // Extract message from backend or fallback
+    const message = error.response?.data?.error || "Login failed. Please try again.";
+
+    // Show based on status code
+    if (error.response?.status === 403) {
+      toast.error("You are not authorized to log in here.");
+    } else if (error.response?.status === 401) {
+      toast.error("Invalid email or password.");
+    } else if (error.response?.status === 404) {
+      toast.error("User not found.");
+    } else {
+      toast.error(message);
+    }
+
+    console.error("Login Error:", error);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
 
 const handleSignupSubmit = async (e) => {
@@ -166,17 +177,17 @@ const handleSignupSubmit = async (e) => {
           <p className="text-base opacity-90">
             Your trusted partner for secure and smart banking solutions.
           </p>
-          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 mt-0 ml-12 md:ml-32 lg:ml-8 lg:mt-3"/>
+          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 mt-0 ml-12 md:ml-32 lg:ml-3 lg:mt-3"/>
         </div>
       </div>
 
       {/* Right Form Section */}
-      <div className="lg:w-full flex justify-center items-center bg-gray-50 p-6 h-full lg:h-full">
+      <div className="lg:w-full flex justify-center items-center bg-gray-100 p-6 h-full lg:h-full">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className={`bg-white backdrop-blur-lg p-8 rounded-sm shadow-lg lg:shadow-xl w-full max-w-sm ${isLogin? `lg:max-w-2xl`: `lg:max-w-5/6`}`}
+          className={`bg-white backdrop-blur-lg p-8 shadow-lg lg:shadow-xl w-full max-w-sm ${isLogin? `lg:max-w-2xl`: `lg:max-w-5/6`}`}
         >
           {/* Conditional Forms */}
           {isLogin ? (

@@ -420,9 +420,9 @@ public class UserController {
 
 
     @PutMapping("/change-phone")
-    public ResponseEntity<?> changePhone(@RequestBody ChangePhoneRequest request) {
+    public ResponseEntity<?> changePhone(@RequestBody ChangePhoneRequest request,Principal principal) {
         try {
-            GenericResponse response = userService.initiatePhoneChange(request);
+            GenericResponse response = userService.initiatePhoneChange(request,principal);
             return ResponseEntity.ok(Map.of("success", true, "data", response));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
