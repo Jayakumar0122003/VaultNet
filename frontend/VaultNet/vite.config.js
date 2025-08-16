@@ -4,14 +4,16 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(),tailwindcss(),[react({
+  plugins: [
+  react({
     include: "**/*.jsx",
-  })]
+  }),
+  tailwindcss(),
 ],
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'https://vaultnet-app.onrender.com',
         changeOrigin: true,
       }
     }
