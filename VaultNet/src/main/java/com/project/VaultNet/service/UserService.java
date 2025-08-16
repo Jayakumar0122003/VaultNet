@@ -20,6 +20,7 @@ import com.project.VaultNet.repository.SupportTicketRepository;
 import com.project.VaultNet.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -237,6 +238,8 @@ public class UserService {
         }
     }
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @Transactional
     public AccountCreationResponse createAccount(AccountCreationRequest request) {
@@ -268,7 +271,7 @@ public class UserService {
                         user.setVerificationToken(token);
 
                         // Create verification link
-                        String verificationLink = "http://localhost:5173/vaultnet-verify-account?token=" + token;
+                        String verificationLink = frontendUrl + "/vaultnet-verify-account?token=" + token;
                         user.setVerificationLink(verificationLink);
 
                         userRepository.save(user);

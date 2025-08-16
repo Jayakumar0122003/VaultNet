@@ -6,6 +6,7 @@ import {Link,useNavigate} from "react-router-dom"
 
 
 const ForgotPasswordPage = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [code, setCode] = useState(Array(6).fill(''));
@@ -39,7 +40,7 @@ const ForgotPasswordPage = () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:8080/api/auth/forgot-password",
+      `${API_URL}/api/auth/forgot-password`,
       { email: email.trim() }
     );
 
@@ -79,7 +80,7 @@ const ForgotPasswordPage = () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:8080/api/auth/verify-otp",
+      `${API_URL}/api/auth/verify-otp`,
       { email, otp: fullCode }
     );
 
@@ -139,7 +140,7 @@ const ForgotPasswordPage = () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:8080/api/auth/reset-password",
+        `${API_URL}/api/auth/reset-password`,
       {
         email,
         newPassword: password,

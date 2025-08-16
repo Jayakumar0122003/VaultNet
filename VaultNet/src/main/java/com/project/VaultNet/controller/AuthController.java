@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -41,6 +42,12 @@ public class AuthController {
 
     @Autowired
     DebitCardService debitCardService;
+
+    @Value("${jwt.at.expire}")
+    private long jwtAccessTokenExpire;
+
+    @Value("${jwt.rt.expire}")
+    private long jwtRefreshTokenExpire;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
@@ -76,8 +83,8 @@ public class AuthController {
             }
 
             // Generate tokens
-            String accessToken = jwtService.generateToken(user, 1000L * 60 * 15);
-            String refreshToken = jwtService.generateToken(user, 1000L * 60 * 60 * 24 * 7);
+            String accessToken = jwtService.generateToken(user, jwtAccessTokenExpire);
+            String refreshToken = jwtService.generateToken(user, jwtRefreshTokenExpire);
 
             // Store refresh token
             tokenStore.storeRefreshToken(user.getEmail(), refreshToken, 7);
@@ -198,7 +205,7 @@ public class AuthController {
         Users user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String newAccessToken = jwtService.generateToken(user, 1000 * 60 * 15);
+        String newAccessToken = jwtService.generateToken(user, jwtAccessTokenExpire);
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 

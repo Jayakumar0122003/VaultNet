@@ -3,6 +3,7 @@ package com.project.VaultNet.config;
 import com.project.VaultNet.filter.JwtAuthenticationFilter;
 import com.project.VaultNet.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -49,13 +50,15 @@ public class SecurityConfig {
                 .build();
     }
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     // ✅ Global CORS config for all endpoints
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173"// React dev URL
+                frontendUrl
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

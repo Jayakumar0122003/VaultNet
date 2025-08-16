@@ -13,6 +13,7 @@ export default function AdminAuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -51,7 +52,7 @@ const handleLoginSubmit = async (e) => {
     toast.loading("Logging in...");
 
     const response = await axios.post(
-      "http://localhost:8080/api/auth/login",
+      `${API_URL}/api/auth/login`,
       loginData,
       { withCredentials: true }
     );
@@ -118,7 +119,7 @@ const handleLoginSubmit = async (e) => {
     try {
       toast.loading("Registering...");
       const response = await axios.post(
-        "http://localhost:8080/api/auth/register",
+        `${API_URL}/api/auth/register`,
         {
           username: signupData.fullName,
           email: signupData.email,

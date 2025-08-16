@@ -18,6 +18,8 @@ export default function AuthPageCreative() {
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
 
   useEffect(() => {
@@ -57,7 +59,7 @@ const handleLoginSubmit = async (e) => {
     toast.loading("Logging in...");
 
     const response = await axios.post(
-      "http://localhost:8080/api/auth/login",
+      `${API_URL}/api/auth/login`,
       loginData,
       { withCredentials: true }
     );
@@ -131,7 +133,7 @@ const handleSignupSubmit = async (e) => {
     toast.loading("Wait Registering...")
     // API call
     const response = await axios.post(
-      "http://localhost:8080/api/auth/register",
+      `${API_URL}/api/auth/register`,
       {
         username: signupData.fullName,
         email: signupData.email,
