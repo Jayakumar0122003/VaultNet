@@ -14,6 +14,7 @@ export default function AccountDetailsUpdate() {
   const [phoneForm, setPhoneForm] = useState({ email: "" });
   const [verifyForm, setVerifyForm] = useState({ newPhoneNumber: "", otp: "" });
   const accessToken = localStorage.getItem("accessToken");
+  const [loading,setLoading] = useState(false);
 
   const handleChange = (e, formType) => {
     const { name, value } = e.target;
@@ -31,6 +32,7 @@ const handleSubmitEmail = async (e) => {
 
   const loadingToast = toast.loading("Updating email...");
   try {
+    setLoading(true)
     const res = await axios.put(
       "/customer/change-email",
       {
@@ -73,6 +75,8 @@ const handleSubmitEmail = async (e) => {
       isLoading: false,
       autoClose: 3000,
     });
+  }finally{
+    setLoading(false)
   }
 };
 
@@ -88,6 +92,7 @@ const handleSendOtp = async (e) => {
 
   const loadingToast = toast.loading("Sending OTP...");
   try {
+    setLoading(true)
     const res = await axios.put(
       "/customer/change-phone",
       { email: phoneForm.email },
@@ -108,6 +113,8 @@ const handleSendOtp = async (e) => {
       isLoading: false,
       autoClose: 3000,
     });
+  }finally{
+    setLoading(false)
   }
 };
 
@@ -122,6 +129,7 @@ const handleVerifyPhone = async (e) => {
 
   const loadingToast = toast.loading("Verifying phone number...");
   try {
+    setLoading(true)
   const res = await axios.post(
     "/customer/verify-otp-phone",
     {
@@ -161,6 +169,8 @@ const handleVerifyPhone = async (e) => {
     isLoading: false,
     autoClose: 3000,
   });
+}finally{
+  setLoading(false)
 }
 
 }
@@ -222,11 +232,12 @@ const handleVerifyPhone = async (e) => {
               <div>
                 <label className="text-xs px-1 font-medium mb-1 flex items-center gap-1 text-main">
                   <FaStarOfLife className="w-2 h-2" />
-                  Last 4 Digits of Account/Phone
+                  Last 4 Digits of Phone Number
                 </label>
                 <input
                   type="text"
                   name="lastFourDigits"
+                  placeholder="ENTER YOUR LAST FOUR DIGITS OF REGISTER PHONE NUMBER"
                   value={emailForm.lastFourDigits}
                   onChange={(e) => handleChange(e, "email")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -241,6 +252,7 @@ const handleVerifyPhone = async (e) => {
                 <input
                   type="email"
                   name="email"
+                  placeholder="ENTER YOUR NEW EMAIL ADDRESS"
                   value={emailForm.email}
                   onChange={(e) => handleChange(e, "email")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -252,9 +264,9 @@ const handleVerifyPhone = async (e) => {
             <div className="flex justify-end px-14">
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Update Email
+                {loading? "Updating...": "Update Email"}
               </button>
             </div>
           </form>
@@ -272,6 +284,7 @@ const handleVerifyPhone = async (e) => {
               <input
                 type="email"
                 name="email"
+                placeholder="ENTER YOUR REGISTER EMAIL ADDRESS"
                 value={phoneForm.email}
                 onChange={(e) => handleChange(e, "phone")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -283,9 +296,9 @@ const handleVerifyPhone = async (e) => {
             <div className="flex justify-end px-14">
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Send OTP
+                {loading? "Sending..." : "Send OTP"}
               </button>
             </div>
           </form>
@@ -302,6 +315,7 @@ const handleVerifyPhone = async (e) => {
                 <input
                   type="text"
                   name="newPhoneNumber"
+                  placeholder="ENTER YOUR NEW PHONE NUMBER"
                   value={verifyForm.newPhoneNumber}
                   onChange={(e) => handleChange(e, "verify")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -316,6 +330,7 @@ const handleVerifyPhone = async (e) => {
                 <input
                   type="text"
                   name="otp"
+                  placeholder="ENTER OTP THAT SENT YOUR EMAIL ADDRESS"
                   value={verifyForm.otp}
                   onChange={(e) => handleChange(e, "verify")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -327,9 +342,9 @@ const handleVerifyPhone = async (e) => {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[25%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[25%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Verify & Update Phone
+                {loading ? "Updating..." : "Verify & Update Phone"}
               </button>
             </div>
           </form>

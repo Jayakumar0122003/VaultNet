@@ -13,6 +13,7 @@ export default function AdminAccountDetailsUpdate() {
   const [phoneStep, setPhoneStep] = useState(1);
   const [phoneForm, setPhoneForm] = useState({ email: "" });
   const [verifyForm, setVerifyForm] = useState({ newPhoneNumber: "", otp: "" });
+  const [loading,setLoding] = useState(false);
   const accessToken = localStorage.getItem("accessToken");
 
   const handleChange = (e, formType) => {
@@ -31,6 +32,7 @@ const handleSubmitEmail = async (e) => {
 
   const loadingToast = toast.loading("Updating email...");
   try {
+    setLoding(true);
     const res = await axios.put(
       "/admin/change-email",
       {
@@ -75,6 +77,8 @@ const handleSubmitEmail = async (e) => {
       isLoading: false,
       autoClose: 3000,
     });
+  }finally{
+    setLoding(false);
   }
 };
 
@@ -90,6 +94,7 @@ const handleSendOtp = async (e) => {
 
   const loadingToast = toast.loading("Sending OTP...");
   try {
+    setLoding(true);
     const res = await axios.put(
       "/admin/change-phone",
       { email: phoneForm.email },
@@ -110,6 +115,8 @@ const handleSendOtp = async (e) => {
       isLoading: false,
       autoClose: 3000,
     });
+  }finally{
+    setLoding(false);
   }
 };
 
@@ -124,6 +131,7 @@ const handleVerifyPhone = async (e) => {
 
   const loadingToast = toast.loading("Verifying phone number...");
   try {
+    setLoding(true)
   const res = await axios.post(
     "/admin/verify-otp-phone",
     {
@@ -162,6 +170,8 @@ const handleVerifyPhone = async (e) => {
     isLoading: false,
     autoClose: 3000,
   });
+}finally{
+  setLoding(false);
 }
 
 }
@@ -228,6 +238,7 @@ const handleVerifyPhone = async (e) => {
                 <input
                   type="text"
                   name="lastFourDigits"
+                  placeholder="ENTER YOUR LAST FOUR DIGITS OF PHONE NUMBER"
                   value={emailForm.lastFourDigits}
                   onChange={(e) => handleChange(e, "email")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -242,6 +253,7 @@ const handleVerifyPhone = async (e) => {
                 <input
                   type="email"
                   name="email"
+                  placeholder="ENTER YOUR NEW EMAIL ADDRESS"
                   value={emailForm.email}
                   onChange={(e) => handleChange(e, "email")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -253,9 +265,9 @@ const handleVerifyPhone = async (e) => {
             <div className="flex justify-end px-14">
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 duration-300 hover:opacity-80 cursor-pointer uppercase  ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Update Email
+                {loading ? "Updating..." : "Update Email"}
               </button>
             </div>
           </form>
@@ -273,6 +285,7 @@ const handleVerifyPhone = async (e) => {
               <input
                 type="email"
                 name="email"
+                placeholder="ENTER YOUR REGISTER EMAIL ADDRESS"
                 value={phoneForm.email}
                 onChange={(e) => handleChange(e, "phone")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -284,9 +297,9 @@ const handleVerifyPhone = async (e) => {
             <div className="flex justify-end px-14">
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:opacity-90 duration-300 uppercase  ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Send OTP
+                {loading ? " Sending..." : "Send OTP"}
               </button>
             </div>
           </form>
@@ -303,6 +316,7 @@ const handleVerifyPhone = async (e) => {
                 <input
                   type="text"
                   name="newPhoneNumber"
+                  placeholder="ENTER YOUR NEW PHONE NUMBER"
                   value={verifyForm.newPhoneNumber}
                   onChange={(e) => handleChange(e, "verify")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -317,6 +331,7 @@ const handleVerifyPhone = async (e) => {
                 <input
                   type="text"
                   name="otp"
+                  placeholder="ENTER OTP THAT SENT TO YOUR"
                   value={verifyForm.otp}
                   onChange={(e) => handleChange(e, "verify")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -339,9 +354,9 @@ const handleVerifyPhone = async (e) => {
               </button>
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[30%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[30%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase  ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Verify & Update Phone Number
+                {loading ? "Verifying..." : "Verify & Update Phone Number"}
               </button>
             </div>
           </form>

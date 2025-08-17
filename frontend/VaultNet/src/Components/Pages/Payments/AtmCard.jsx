@@ -55,7 +55,7 @@ export default function AtmCard() {
   };
 
   return (
-    <div className="font-sans w-full md:w-[400px] mx-auto mt-5 text-[#0A5840]">
+    <div className="font-sans w-full md:w-[400px] mx-auto mt-5 text-main">
       <h2 className="text-center mb-5 font-bold text-xl">Your ATM Card</h2>
 
       {!isVerified ? (
@@ -80,12 +80,12 @@ export default function AtmCard() {
             <button
               onClick={handleViewClick}
               className="
-                mt-5 px-6 py-2 rounded-full bg-green-600
+                mt-5 px-6 py-2 rounded-full bg-purple-800
                 font-bold text-white
                 shadow-md
-                hover:bg-green-700
-                transition-colors duration-300
-                focus:outline-none focus:ring-2 focus:ring-green-400
+                hover:bg-purple-700
+                transition-colors duration-300 cursor-pointer
+                focus:outline-none focus:ring-2 focus:ring-purple-400
               "
               aria-label="View ATM card"
             >
@@ -95,7 +95,7 @@ export default function AtmCard() {
             <div className="mt-5 flex flex-col items-center w-full">
               <label
                 htmlFor="phoneDigits"
-                className="mb-1 font-semibold text-sm text-green-200"
+                className="mb-1 font-semibold text-sm text-purple-500"
               >
                 Enter last 4 digits of your phone number:
               </label>
@@ -126,10 +126,10 @@ export default function AtmCard() {
                   font-bold text-white
                   shadow-md
                   transition-colors duration-300
-                  focus:outline-none focus:ring-2 focus:ring-green-400
+                  focus:outline-none focus:ring-2 focus:ring-purple-400
                   ${
                     inputDigits.length === 4 && !loading
-                      ? "bg-green-600 hover:bg-green-700 cursor-pointer"
+                      ? "bg-purple-700 hover:bg-purple-800 cursor-pointer"
                       : "bg-gray-500 cursor-not-allowed"
                   }
                 `}
@@ -150,8 +150,8 @@ export default function AtmCard() {
           <div
             className="
               w-full h-60
-              bg-gradient-to-br from-main via-green-900 to-green-800
-              text-green-200
+              bg-gradient-to-br from-main via-purple-900 to-main
+              text-purple-200
               p-8
               font-mono font-semibold
               relative

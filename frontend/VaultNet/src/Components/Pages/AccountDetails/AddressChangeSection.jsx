@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {  useState } from "react";
 import { FaStarOfLife } from "react-icons/fa";
 import axios from "../../../axiosInstance";
 import { toast } from "react-toastify";
@@ -7,6 +7,7 @@ import { HiHome } from "react-icons/hi2";
 export default function AddressChangeUpdate() {
   const [step, setStep] = useState(1);
   const [emailForm, setEmailForm] = useState({ email: "" });
+  const [loading,setLoading] = useState(false);
   const [addressForm, setAddressForm] = useState({
     otp: "",
     addressLine: "",
@@ -31,6 +32,7 @@ export default function AddressChangeUpdate() {
   const loadingToast = toast.loading("Sending OTP...");
 
   try {
+    setLoading(true)
     const res = await axios.put(
       "/customer/change-address",
       { email: emailForm.email },
@@ -67,6 +69,8 @@ export default function AddressChangeUpdate() {
       isLoading: false,
       autoClose: 3000,
     });
+  }finally{
+    setLoading(false)
   }
 };
 
@@ -76,6 +80,7 @@ export default function AddressChangeUpdate() {
     e.preventDefault();
     const loadingToast = toast.loading("Updating address...");
     try {
+      setLoading(true)
       const res = await axios.post("/customer/verify-otp-address", addressForm, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
@@ -118,6 +123,8 @@ export default function AddressChangeUpdate() {
         isLoading: false,
         autoClose: 3000,
       });
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -155,6 +162,7 @@ export default function AddressChangeUpdate() {
                   type="email"
                   name="email"
                   value={emailForm.email}
+                  placeholder="ENTER YOUR REGISTER EMAIL ADDRESS"
                   onChange={(e) => handleChange(e, "email")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
                   required
@@ -165,9 +173,9 @@ export default function AddressChangeUpdate() {
             <div className="flex justify-end px-10">
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Send OTP
+                {loading? "Sending OTP..." : "Send OTP"}
               </button>
             </div>
           </form>
@@ -185,6 +193,7 @@ export default function AddressChangeUpdate() {
                 <input
                   type="text"
                   name="otp"
+                  placeholder="ENTER OTP THAT SENT TO YOUR MAIL"
                   value={addressForm.otp}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -199,6 +208,7 @@ export default function AddressChangeUpdate() {
                 <input
                   type="text"
                   name="addressLine"
+                  placeholder="ENTER YOUR STREET ADDRESS LINE"
                   value={addressForm.addressLine}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -213,6 +223,7 @@ export default function AddressChangeUpdate() {
                 <input
                   type="text"
                   name="city"
+                  placeholder="ENTER YOUR CITY NAME"
                   value={addressForm.city}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -227,6 +238,7 @@ export default function AddressChangeUpdate() {
                 <input
                   type="text"
                   name="state"
+                  placeholder="ENTER YOUR STATE NAME"
                   value={addressForm.state}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -241,6 +253,7 @@ export default function AddressChangeUpdate() {
                 <input
                   type="text"
                   name="postalCode"
+                  placeholder="ENTER YOUR POSTAL CODE"
                   value={addressForm.postalCode}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -252,9 +265,9 @@ export default function AddressChangeUpdate() {
             <div className="flex justify-end px-14">
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[30%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[30%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Verify & Update Address
+               {loading ? "Updating...": " Verify & Update Address"}
               </button>
             </div>
           </form>

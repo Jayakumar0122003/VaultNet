@@ -21,7 +21,7 @@ export default function VerifyEmailPage() {
       return;
     }
 
-    const loadingToastId = toast.loading("Verifying your email, please wait...");
+    // const loadingToastId = toast.loading("Verifying your email, please wait...");
 
     axios
       .get(`/auth/verify?token=${token}`)
@@ -29,15 +29,18 @@ export default function VerifyEmailPage() {
         setStatus("success");
         const successMsg = res.data || "Your email has been verified successfully!";
         setMessage(successMsg);
-        toast.dismiss(loadingToastId);
+        // toast.dismiss(loadingToastId);
         toast.success(successMsg);
+        setTimeout(() => {
+        window.location.reload();
+        }, 1000);
       })
       .catch((err) => {
         setStatus("error");
         const errorMsg =
           err.response?.data || "Verification failed. Token may be invalid or expired.";
         setMessage(errorMsg);
-        toast.dismiss(loadingToastId);
+        // toast.dismiss(loadingToastId);
         toast.error(errorMsg);
       });
   }, [searchParams]);
@@ -53,13 +56,13 @@ export default function VerifyEmailPage() {
         )}
         {status === "success" && (
           <>
-            <h1 className="text-xl font-bold text-green-600 mb-2">✅ Email Verified</h1>
+            <h1 className="text-xl font-bold text-green-600 mb-2">Email Verified</h1>
             <p className="text-gray-700">{message}</p>
           </>
         )}
         {status === "error" && (
           <>
-            <h1 className="text-xl font-bold text-red-600 mb-2">❌ Verification Failed</h1>
+            <h1 className="text-xl font-bold text-red-600 mb-2"> Verification Failed</h1>
             <p className="text-gray-700">{message}</p>
           </>
         )}

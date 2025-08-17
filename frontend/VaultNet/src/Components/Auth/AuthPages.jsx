@@ -173,13 +173,13 @@ const handleSignupSubmit = async (e) => {
   return (
     <div className="h-full md:h-screen lg:h-[92vh] flex flex-col lg:flex-row border-b-1 border-sec">
       {/* Left Illustration */}
-      <div className="lg:w-1/3 bg-main flex justify-center items-center p-8">
-        <div className="text-center text-white ">
-          <h1 className="text-5xl font-bold mb-4 uppercase">Welcome to VaultNet</h1>
+      <div className="lg:w-1/2 bg-main flex justify-center items-center p-8 py-14 lg:py-0">
+        <div className="text-center text-white flex flex-col justify-between items-center">
+          <p><h1 className="text-5xl font-bold mb-4 uppercase">Welcome to VaultNet</h1>
           <p className="text-base opacity-90">
             Your trusted partner for secure and smart banking solutions.
-          </p>
-          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 mt-0 ml-12 md:ml-32 lg:ml-3 lg:mt-3"/>
+          </p></p>
+          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 "/>
         </div>
       </div>
 
@@ -191,6 +191,24 @@ const handleSignupSubmit = async (e) => {
           transition={{ duration: 0.5 }}
           className={`bg-white backdrop-blur-lg p-8 shadow-lg lg:shadow-xl w-full max-w-sm ${isLogin? `lg:max-w-2xl`: `lg:max-w-5/6`}`}
         >
+          <div className="flex justify-center gap-8 mb-6 border-b border-gray-200 pb-2">
+              <button
+                onClick={() => setIsLogin(true)}
+                className={`text-lg font-semibold uppercase tracking-wide ${
+                  isLogin ? "text-main border-b-2 border-main" : "text-gray-500 hover:text-main"
+                }`}
+              >
+                Login
+              </button>
+              <button
+                onClick={() => setIsLogin(false)}
+                className={`text-lg font-semibold uppercase tracking-wide ${
+                  !isLogin ? "text-main border-b-2 border-main" : "text-gray-500 hover:text-main"
+                }`}
+              >
+                Register
+              </button>
+            </div>
           {/* Conditional Forms */}
           {isLogin ? (
             <form onSubmit={handleLoginSubmit} className="space-y-6">
@@ -257,12 +275,14 @@ const handleSignupSubmit = async (e) => {
 
           <div className="flex justify-center">
             <button
-            disabled={isSubmitting}
-            type="submit"
-            className={`w-full bg-main text-white py-2 hover:opacity-80 duration-300 cursor-pointer transition lg:w-[50%] ${isSubmitting && `cursor-not-allowed bg-gray-400`}`}
-          >
-            {isSubmitting? "Logging...": "Login Now"}
-          </button>
+                  disabled={isSubmitting}
+                  type="submit"
+                  className={`w-full bg-main text-white py-2 duration-300 transition lg:w-[50%]
+                    ${isSubmitting ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}
+                  `}
+                >
+                  { isSubmitting ? "Logging..." : "Login Now"}
+                </button>
           </div>
         </form>
       ) : (
@@ -358,12 +378,14 @@ const handleSignupSubmit = async (e) => {
 
               <div className="flex justify-center">
                 <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full bg-main text-white py-2 hover:opacity-80 duration-300 transition lg:w-[40%] cursor-pointer ${isSubmitting && `cursor-not-allowed bg-gray-400`}`}
-              >
-                {isSubmitting ? "Creating...": "Create Account"}
-              </button>
+                  disabled={isSubmitting}
+                  type="submit"
+                  className={`w-full bg-main text-white py-2 duration-300 transition lg:w-[40%]
+                    ${isSubmitting ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}
+                  `}
+                >
+                  {isSubmitting ? "Creating..." : "Create Account"}
+                </button>
               </div>
             </form>
           )}

@@ -242,8 +242,13 @@ public class UserService {
     private String frontendUrl;
 
     @Transactional
-    public AccountCreationResponse createAccount(AccountCreationRequest request) {
+    public AccountCreationResponse createAccount(AccountCreationRequest request, Principal principal) {
         try {
+            Users users = userRepository.findByEmail(principal.getName())
+                    .orElseThrow(()-> new ResourceNotFoundException("Invalid Token!"));
+            if(!users.getEmail().equalsIgnoreCase(request.getEmail())){
+                return  new AccountCreationResponse(false,"Please provide register email address!");
+            }
             return userRepository.findByEmail(request.getEmail())
                     .map(user -> {
                         if (user.isAccountCreated()) {
@@ -257,6 +262,9 @@ public class UserService {
                         // Populate user details
                         user.setFirstName(request.getFirstName());
                         user.setLastName(request.getLastName());
+                        if(userRepository.existsByPhone(request.getPhone())){
+                            return new AccountCreationResponse(false, "Phone number already exist!");
+                        }
                         user.setPhone(request.getPhone());
                         user.setDob(request.getDob());
 
@@ -271,7 +279,7 @@ public class UserService {
                         user.setVerificationToken(token);
 
                         // Create verification link
-                        String verificationLink = frontendUrl + "/vaultnet-verify-account?token=" + token;
+                        String verificationLink = frontendUrl + "vaultnet-verify-account?token=" + token;
                         user.setVerificationLink(verificationLink);
 
                         userRepository.save(user);
@@ -636,6 +644,7 @@ public class UserService {
                     .emailVerified(user.isEmailVerified())
                     .accountCreated(user.isAccountCreated())
                     .verificationLink(user.getVerificationLink())
+                    .verificationToken(user.getVerificationToken())
                     .createdAt(user.getCreatedAt())
                     .build();
 

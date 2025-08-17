@@ -5,6 +5,7 @@ import com.project.VaultNet.customexceptions.TransactionLimitExceededException;
 import com.project.VaultNet.dto.TransactionDto.*;
 import com.project.VaultNet.model.DebitCard;
 import com.project.VaultNet.model.Transaction;
+import com.project.VaultNet.model.TransactionType;
 import com.project.VaultNet.repository.DebitCardRepository;
 import com.project.VaultNet.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,24 +97,24 @@ public class TransactionService {
     private void recordTransaction(DebitCard sender, DebitCard receiver, BigDecimal amount) {
         LocalDateTime now = LocalDateTime.now();
 
-        Transaction debitTxn = new Transaction();
-        debitTxn.setAmount(amount);
-        debitTxn.setTimestamp(now);
-        debitTxn.setType("DEBIT");
-        debitTxn.setDescription("Transfer to " + receiver.getAccountNumber());
-        debitTxn.setSender(sender);
-        debitTxn.setReceiver(receiver);
-        transactionRepository.save(debitTxn);
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setTimestamp(now);
+        transaction.setSender(sender);
+        transaction.setReceiver(receiver);
 
-        Transaction creditTxn = new Transaction();
-        creditTxn.setAmount(amount);
-        creditTxn.setTimestamp(now);
-        creditTxn.setType("CREDIT");
-        creditTxn.setDescription("Received from " + sender.getAccountNumber());
-        creditTxn.setSender(sender);
-        creditTxn.setReceiver(receiver);
-        transactionRepository.save(creditTxn);
+        // Determine type
+        if (sender.getId().equals(receiver.getId())) {
+            transaction.setType(TransactionType.DEPOSIT);
+            transaction.setDescription("Money Deposited");
+        } else {
+            transaction.setType(TransactionType.DEBIT);
+            transaction.setDescription("Transfer to " + receiver.getAccountNumber());
+        }
+
+        transactionRepository.save(transaction);
     }
+
 
 
     // ====================================
@@ -191,24 +193,24 @@ public class TransactionService {
     private void recordTransactionCard(DebitCard sender, DebitCard receiver, BigDecimal amount) {
         LocalDateTime now = LocalDateTime.now();
 
-        Transaction debitTxn = new Transaction();
-        debitTxn.setAmount(amount);
-        debitTxn.setTimestamp(now);
-        debitTxn.setType("DEBIT");
-        debitTxn.setDescription("Transfer to " + receiver.getAccountNumber());
-        debitTxn.setSender(sender);
-        debitTxn.setReceiver(receiver);
-        transactionRepository.save(debitTxn);
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setTimestamp(now);
+        transaction.setSender(sender);
+        transaction.setReceiver(receiver);
 
-        Transaction creditTxn = new Transaction();
-        creditTxn.setAmount(amount);
-        creditTxn.setTimestamp(now);
-        creditTxn.setType("CREDIT");
-        creditTxn.setDescription("Received from " + sender.getAccountNumber());
-        creditTxn.setSender(sender);
-        creditTxn.setReceiver(receiver);
-        transactionRepository.save(creditTxn);
+        // Determine type
+        if (sender.getId().equals(receiver.getId())) {
+            transaction.setType(TransactionType.DEPOSIT);
+            transaction.setDescription("Money Deposited");
+        } else {
+            transaction.setType(TransactionType.DEBIT);
+            transaction.setDescription("Transfer to " + receiver.getAccountNumber());
+        }
+
+        transactionRepository.save(transaction);
     }
+
 
 
     // ====================================
@@ -305,26 +307,26 @@ public class TransactionService {
             card.setBalance(card.getBalance().add(request.getAmount()));
             debitCardRepository.save(card);
 
-            // Record transaction
-            Transaction creditTxn = new Transaction();
-            creditTxn.setAmount(request.getAmount());
-            creditTxn.setTimestamp(LocalDateTime.now());
-            creditTxn.setType("CREDIT");
-            creditTxn.setDescription("Money Deposited");
-            creditTxn.setSender(card);
-            creditTxn.setReceiver(card);
-            transactionRepository.save(creditTxn);
+            // Record deposit transaction
+            Transaction depositTxn = new Transaction();
+            depositTxn.setAmount(request.getAmount());
+            depositTxn.setTimestamp(LocalDateTime.now());
+            depositTxn.setType(TransactionType.DEPOSIT); // use DEPOSIT type
+            depositTxn.setDescription("Money Deposited");
+            depositTxn.setSender(card);
+            depositTxn.setReceiver(card);
+            transactionRepository.save(depositTxn);
 
             return new MoneyDepositResponse(true, "Successfully Deposited!");
 
         } catch (ResourceNotFoundException e) {
             throw e; // propagate for controller → 404 Not Found
         } catch (Exception e) {
-            // Log and wrap unexpected exceptions
             System.err.println("Failed to deposit money: " + e.getMessage());
             throw new RuntimeException("Unable to deposit money. Please try again later.", e);
         }
     }
+
 
 
     public MoneyWithdrawResponse withdrawMoney(MoneyWithdrawRequest request) {
@@ -341,7 +343,7 @@ public class TransactionService {
             // PIN verification
             if (!passwordEncoder.matches(request.getPin(), card.getPinHash())) {
                 handleFailedAttempt(card);
-                return new MoneyWithdrawResponse(false, "Please provide valid PIN!.");
+                return new MoneyWithdrawResponse(false, "Please provide valid PIN!");
             }
 
             // Balance check
@@ -357,14 +359,14 @@ public class TransactionService {
             debitCardRepository.save(card);
 
             // Record transaction
-            Transaction debitTxn = new Transaction();
-            debitTxn.setAmount(request.getAmount());
-            debitTxn.setTimestamp(LocalDateTime.now());
-            debitTxn.setType("DEBIT");
-            debitTxn.setDescription("Money Withdrawn");
-            debitTxn.setSender(card);
-            debitTxn.setReceiver(card);
-            transactionRepository.save(debitTxn);
+            Transaction withdrawalTxn = new Transaction();
+            withdrawalTxn.setAmount(request.getAmount());
+            withdrawalTxn.setTimestamp(LocalDateTime.now());
+            withdrawalTxn.setType(TransactionType.DEBIT); // Money sent from user's account
+            withdrawalTxn.setDescription("Money Withdrawn");
+            withdrawalTxn.setSender(card);
+            withdrawalTxn.setReceiver(card); // For withdrawals, sender = receiver
+            transactionRepository.save(withdrawalTxn);
 
             return new MoneyWithdrawResponse(true, "Money withdrawal successful");
 
@@ -376,58 +378,16 @@ public class TransactionService {
         }
     }
 
-
-    public List<Transaction> getDebitTransactions(Long userId) {
-        try {
-            List<Transaction> transactions = transactionRepository.findBySenderIdAndType(userId, "DEBIT");
-
-            if (transactions.isEmpty()) {
-                System.out.println("No debit transactions found for user ID: " + userId);
-            }
-
-            return transactions;
-
-        } catch (Exception e) {
-            // Log unexpected errors and rethrow
-            System.err.println("Failed to fetch debit transactions for user ID " + userId + ": " + e.getMessage());
-            throw new RuntimeException("Could not retrieve debit transactions. Please try again later.", e);
-        }
+    public List<Transaction> getUserDebits(Long cardId) {
+        return transactionRepository.findUserDebits(cardId, TransactionType.DEBIT);
     }
 
-
-    public List<Transaction> getCreditTransactions(Long userId) {
-        try {
-            List<Transaction> transactions = transactionRepository.findByReceiverIdAndType(userId, "CREDIT");
-
-            if (transactions.isEmpty()) {
-                System.out.println("No credit transactions found for user ID: " + userId);
-            }
-
-            return transactions;
-
-        } catch (Exception e) {
-            // Log unexpected errors and rethrow
-            System.err.println("Failed to fetch credit transactions for user ID " + userId + ": " + e.getMessage());
-            throw new RuntimeException("Could not retrieve credit transactions. Please try again later.", e);
-        }
+    public List<Transaction> getUserCredits(Long cardId) {
+        return transactionRepository.findUserCredits(cardId, TransactionType.CREDIT, TransactionType.DEPOSIT);
     }
 
-
-    public List<Transaction> getAllTransactionsForUser(Long userId) {
-        try {
-            List<Transaction> transactions = transactionRepository.findBySenderIdOrReceiverId(userId, userId);
-
-            if (transactions.isEmpty()) {
-                System.out.println("No transactions found for user ID: " + userId);
-            }
-
-            return transactions;
-
-        } catch (Exception e) {
-            // Log the error and rethrow as RuntimeException
-            System.err.println("Failed to fetch transactions for user ID " + userId + ": " + e.getMessage());
-            throw new RuntimeException("Could not retrieve transactions. Please try again later.", e);
-        }
+    public List<Transaction> getFullHistory(Long cardId) {
+        return transactionRepository.findFullHistory(cardId);
     }
 
 }

@@ -14,6 +14,7 @@ export default function AdminAuthPage() {
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -68,12 +69,13 @@ const handleLoginSubmit = async (e) => {
       });
 
       setLoginData({ email: "", password: "" });
+      setIsCompleted(true);
       navigate("/");
     }
 
   } catch (error) {
     toast.dismiss();
-
+    setIsSubmitting(false);
     // Extract message from backend or fallback
     const message = error.response?.data?.error || "Login failed. Please try again.";
 
@@ -129,7 +131,7 @@ const handleLoginSubmit = async (e) => {
       );
       toast.dismiss();
       toast.success("Admin signup successful!", { position: "top-right", autoClose: 3000 });
-
+      setIsCompleted(true);
       console.log("Admin Signup Response:", response.data);
       setSignupData({ fullName: "", email: "", password: "", confirmPassword: "" });
       navigate("/vaultnet-authenticate-admin?mode=login"); // redirect to login page
@@ -148,26 +150,35 @@ const handleLoginSubmit = async (e) => {
   return (
     <div className="h-full md:h-screen lg:h-[92vh] flex flex-col lg:flex-row border-b-1 border-sec">
       {/* Left Illustration */}
-      <div className="lg:w-1/3 bg-white flex justify-center items-center p-8">
-        <div className="text-center text-main">
-          <h1 className="text-5xl font-bold mb-4 uppercase">Admin Portal</h1>
-          <p className="text-base opacity-90">
-            Manage VaultNet securely and efficiently.
-          </p>
-          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64 mt-0 ml-12 md:ml-32 lg:ml-3 lg:mt-3" />
-        </div>
-      </div>
-
-      {/* Right Form Section */}
-      <div className="lg:w-full flex justify-center items-center bg-sec p-6 h-full lg:h-full">
+      
+      <div className="lg:w-full flex justify-center items-center bg-gray-100 p-6 h-full lg:h-full">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className={`bg-white backdrop-blur-lg p-8 shadow-lg lg:shadow-xl w-full max-w-sm ${
+          className={`bg-white backdrop-blur-lg p-8 shadow-lg w-full max-w-sm ${
             isLogin ? `lg:max-w-2xl` : `lg:max-w-5/6`
           }`}
         >
+          <div className="flex justify-center gap-8 mb-6 border-b border-gray-200 pb-2">
+            <button
+              onClick={() => setIsLogin(true)}
+              className={`text-lg font-semibold uppercase tracking-wide ${
+                isLogin ? "text-main border-b-2 border-main" : "text-gray-500 hover:text-main"
+              }`}
+            >
+              Login
+            </button>
+            <button
+              onClick={() => setIsLogin(false)}
+              className={`text-lg font-semibold uppercase tracking-wide ${
+                !isLogin ? "text-main border-b-2 border-main" : "text-gray-500 hover:text-main"
+              }`}
+            >
+              Register
+            </button>
+          </div>
+
           {isLogin ? (
             <form onSubmit={handleLoginSubmit} className="space-y-6">
               <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-center text-main mb-2 flex gap-2 justify-center uppercase lg:gap-3">
@@ -206,27 +217,41 @@ const handleLoginSubmit = async (e) => {
                 required
               />
 
+              <div className="flex justify-between">
               <div className="flex items-center">
-                <input
-                  id="showPasswordLogin"
-                  type="checkbox"
-                  checked={showPassword}
-                  onChange={() => setShowPassword(!showPassword)}
-                  className="mr-2"
-                />
-                <label htmlFor="showPasswordLogin" className="text-gray-700 text-sm">
-                  Show Password
-                </label>
-              </div>
+            <input
+              id="showPasswordLogin"
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword(!showPassword)}
+              className="mr-2"
+            />
+            <label htmlFor="showPasswordLogin" className="text-gray-700 text-sm">
+              Show Password
+            </label>
+          </div>
+          {/* Forgot Password link */}
+          <div className="text-right">
+            <a
+              href="/vaultnet-authenticate-forgot-password"
+              className="text-sm text-main hover:underline"
+            >
+              Forgot Password?
+            </a>
+          </div>
+          </div>
 
               <div className="flex justify-center">
-                <button
-                  disabled={isSubmitting}
+               <button
+                  disabled={isSubmitting || isCompleted}
                   type="submit"
-                  className={`w-full bg-main text-white py-2 hover:opacity-80 duration-300 cursor-pointer transition lg:w-[50%] ${isSubmitting && `cursor-not-allowed bg-gray-400`}`}
+                  className={`w-full bg-main text-white py-2 duration-300 transition lg:w-[50%]
+                    ${isSubmitting || isCompleted ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}
+                  `}
                 >
-                  {isSubmitting ? "Logging..." : "Login Now"}
+                  {isCompleted ? "Completed" : isSubmitting ? "Logging..." : "Login Now"}
                 </button>
+
               </div>
             </form>
           ) : (
@@ -320,14 +345,16 @@ const handleLoginSubmit = async (e) => {
                   </label>
                 </div>
               </div>
-
+              
               <div className="flex justify-center">
                 <button
+                  disabled={isSubmitting || isCompleted}
                   type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full bg-main text-white py-2 hover:opacity-80 duration-300 transition lg:w-[40%] cursor-pointer ${isSubmitting && `cursor-not-allowed bg-gray-400`}`}
+                  className={`w-full bg-main text-white py-2 duration-300 transition lg:w-[40%]
+                    ${isSubmitting || isCompleted ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}
+                  `}
                 >
-                  {isSubmitting ? "Creating..." : "Create Account"}
+                  {isCompleted ? "Completed" : isSubmitting ? "Creating..." : "Create Account"}
                 </button>
               </div>
             </form>
@@ -343,6 +370,18 @@ const handleLoginSubmit = async (e) => {
             </span>
           </p>
         </motion.div>
+      </div>
+      {/* Right Form Section */}
+      <div className="lg:w-1/2 bg-main flex justify-center items-center p-8 py-14 lg:py-0 border-r-1 border-gray-200">
+        <div className="text-center text-white flex flex-col justify-between items-center">
+         <div>
+           <h1 className="text-5xl font-bold mb-4 uppercase">Admin Portal</h1>
+          <p className="text-base opacity-90">
+            Manage VaultNet securely and efficiently.
+          </p>
+         </div>
+          <RiMoneyRupeeCircleFill className="w-52 h-52 md:w-64 md:h-64" />
+        </div>
       </div>
     </div>
   );

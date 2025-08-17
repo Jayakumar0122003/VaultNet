@@ -20,7 +20,7 @@ import { ImProfile } from "react-icons/im";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout, loading, role } = useContext(AuthContext);
-  const [change, setChange] = useState(false);
+  const [change, setChange] = useState("ADMIN");
 
    const location = useLocation();
   if (location.pathname === "/vaultnet-verify-account") {
@@ -109,41 +109,17 @@ export default function Navbar() {
             </>
           ) : (
             <>
-            {change ? (
-              <>
-                <NavLink to="/vaultnet-authenticate?mode=login" className={navLinkClass}>
-                  Login
-                </NavLink>
+            <NavLink
+              to={change === "ADMIN" ? "/vaultnet-authenticate-admin" : "/vaultnet-authenticate"}
+              className="text-gray-700 font-medium hover:text-main transition text-center uppercase flex items-center gap-2 justify-center"
+              onClick={() => {
+                setChange(change === "ADMIN" ? "CUSTOMER" : "ADMIN");
+                setIsOpen(false);
+              }}
+            >
+              <FaUserCircle className="text-xl" /> {change === "ADMIN" ? "Admin Portal" : "User Portal"}
+            </NavLink>
 
-                <NavLink
-                  to="/vaultnet-authenticate?mode=signup"
-                  className="bg-main text-white px-5 py-2 rounded-full shadow-md transition hover:opacity-80 duration-300"
-                >
-                  Get Started
-                </NavLink>
-
-                <NavLink to="/vaultnet-authenticate-admin" className={navLinkClass} onClick={()=> setChange(!change)}>
-                  <FaUserCircle className="text-xl" /> Admin Portal
-                </NavLink>
-              </>
-            ) : (
-              <>
-                <NavLink to="/vaultnet-authenticate-admin?mode=login" className={navLinkClass}>
-                  Login
-                </NavLink>
-
-                <NavLink
-                  to="/vaultnet-authenticate-admin?mode=signup"
-                  className="bg-main text-white px-5 py-2 rounded-full shadow-md transition hover:opacity-80 duration-300"
-                >
-                  Get Started
-                </NavLink>
-
-                <NavLink to="/vaultnet-authenticate" className={navLinkClass} onClick={()=>setChange(!change)}> 
-                  <FaUserCircle className="text-xl" /> User Portal
-                </NavLink>
-              </>
-            )}
           </>
 
           )}
@@ -224,17 +200,17 @@ export default function Navbar() {
                 >
                   <AiFillHome className="text-xl" /> Home
                 </NavLink>
+                <NavLink
+                  to={change === "ADMIN" ? "/vaultnet-authenticate-admin" : "/vaultnet-authenticate"}
+                  className="text-gray-700 font-medium hover:text-main transition text-center uppercase flex items-center gap-2 justify-center"
+                  onClick={() => {
+                    setChange(change === "ADMIN" ? "CUSTOMER" : "ADMIN");
+                    setIsOpen(false);
+                  }}
+                >
+                  <FaUserCircle className="text-xl" /> {change === "ADMIN" ? "Admin Portal" : "User Portal"}
+                </NavLink>
 
-                  <NavLink
-                    to={change ? "/vaultnet-authenticate": "/vaultnet-authenticate-admin"}
-                    className={navLinkClass}
-                    onClick={() => {
-                      setChange(!change);
-                      setIsOpen(false);
-                    }}
-                  >
-                    <FaUserCircle className="text-xl" />  {change ? "User Portal" : "Admin Portal"}
-                  </NavLink>
             </>
           )}
         </div>

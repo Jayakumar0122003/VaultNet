@@ -83,11 +83,11 @@ public class DebitCard {
     private LocalDate lastTransactionDate;
 
     @OneToMany(mappedBy = "sender")
-    @JsonManagedReference(value = "sent")
+    @JsonManagedReference
     private List<Transaction> sentTransactions;
 
     @OneToMany(mappedBy = "receiver")
-    @JsonManagedReference(value = "received")
+    @JsonManagedReference
     private List<Transaction> receivedTransactions;
     ;
 

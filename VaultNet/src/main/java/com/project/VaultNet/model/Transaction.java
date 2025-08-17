@@ -23,18 +23,19 @@ public class Transaction {
 
     private LocalDateTime timestamp;
 
-    private String type; // "DEBIT" or "CREDIT"
+    @Enumerated(EnumType.STRING)
+    private TransactionType type; // CREDIT, DEBIT, DEPOSIT
 
     private String description;
 
+    // The user who initiated the transaction
     @ManyToOne
     @JoinColumn(name = "sender_id")
-    @JsonBackReference(value = "sent")
+    @JsonBackReference
     private DebitCard sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver_id")
-    @JsonBackReference(value = "received")
+    @JsonBackReference
     private DebitCard receiver;
-
 }

@@ -12,6 +12,7 @@ export default function ChangePinUpdate() {
     confirmPin: "",
   });
   const accessToken = localStorage.getItem("accessToken");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,6 +45,7 @@ export default function ChangePinUpdate() {
 
     const loadingToast = toast.loading("Updating PIN...");
     try {
+      setLoading(true)
       const res = await axios.post(
         "/customer/change-pin",
         {
@@ -85,6 +87,8 @@ export default function ChangePinUpdate() {
         isLoading: false,
         autoClose: 3000,
       });
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -121,6 +125,7 @@ export default function ChangePinUpdate() {
               <input
                 type="email"
                 name="email"
+                placeholder="ENTER YOUR REGISTER EMAIL ADDRESS"
                 value={form.email}
                 onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -137,6 +142,7 @@ export default function ChangePinUpdate() {
               <input
                 type="password"
                 name="oldPin"
+                placeholder="ENTER YOUR OLD ATM PIN"
                 maxLength={4}
                 inputMode="numeric"
                 pattern="\d*"
@@ -156,6 +162,7 @@ export default function ChangePinUpdate() {
               <input
                 type="password"
                 name="newPin"
+                placeholder="ENTER YOUR NEW ATM PIN"
                 maxLength={4}
                 inputMode="numeric"
                 pattern="\d*"
@@ -175,6 +182,7 @@ export default function ChangePinUpdate() {
               <input
                 type="password"
                 name="confirmPin"
+                placeholder="CONFIRM YOUR NEW ATM PIN"
                 maxLength={4}
                 inputMode="numeric"
                 pattern="\d*"
@@ -190,9 +198,9 @@ export default function ChangePinUpdate() {
           <div className="flex justify-end px-14">
             <button
               type="submit"
-              className="w-full md:w-[40%] lg:w-[25%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+              className={`w-full md:w-[40%] lg:w-[25%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
             >
-              Update PIN
+              {loading ? "Updating..." : "Update PIN"}
             </button>
           </div>
         </form>

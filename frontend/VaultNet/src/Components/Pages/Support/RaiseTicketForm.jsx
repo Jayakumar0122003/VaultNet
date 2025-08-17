@@ -110,7 +110,7 @@ export default function RaiseTicketForm({fetchTickets}) {
           <button
             type="submit"
             disabled={loading}
-            className={`bg-main text-white py-2 px-6 uppercase font-semibold hover:bg-green-900 transition duration-300 ${
+            className={`bg-main text-white py-2 px-6 uppercase font-semibold hover:opacity-80 transition duration-300 ${
               loading ? "opacity-60 cursor-not-allowed" : ""
             }`}
           >

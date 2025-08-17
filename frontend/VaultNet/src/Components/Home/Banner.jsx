@@ -14,7 +14,7 @@ export default function Banner() {
     );
   }
   return (
-    <section className="w-full bg-white pt-4 px-4 md:px-10 lg:px-14">
+    <section className="w-full bg-white pt-10 md:pt-6 px-4 md:px-10 lg:px-14">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-12">
         
         {/* Left content */}
@@ -45,12 +45,22 @@ export default function Banner() {
               transition={{ delay: 0.3 }}
             className="mt-8 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4"
           >
-            {user ? <a
+            {user ? 
+            <>
+            {user.role === "ADMIN" ?
+            <a
+              href="/vaultnet-admin-profile-details"
+              className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"
+            >
+              View Profile
+            </a>:<a
               href="/vaultnet-bank-account"
               className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"
             >
               Bank Account
-            </a>:
+            </a>}
+            </>
+            :
             <a
               href="/vaultnet-authenticate?mode=signup"
               className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"

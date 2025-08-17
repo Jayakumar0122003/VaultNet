@@ -157,7 +157,7 @@ const handleSendCode = async () => {
     <div className="h-[90vh] md:h-[90vh] flex items-center justify-center bg-gray-100">
       <div className="w-[80%] md:w-full max-w-md bg-white p-8 rounded-sm ">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-main dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-main dark:text-white mb-2 uppercase">
             {step === 1 && 'Forgot your ATM pin?'}
             {step === 2 && 'Check your inbox'}
             {step === 3 && 'Reset ATM Pin'}
@@ -192,7 +192,7 @@ const handleSendCode = async () => {
             <div className='flex justify-center pt-5'>
               <button
                 onClick={handleSendCode}
-                className="w-full bg-main dark:bg-gray-900 hover:bg-sec hover:text-gray-700 text-white font-medium py-2 rounded-sm duration-300 text-xs md:text-sm"
+                className="w-full bg-main dark:bg-gray-900 hover:opacity-80 cursor-pointer text-white font-medium py-2 duration-300 text-xs md:text-sm"
               >
                 Send Reset Code
               </button>
@@ -234,7 +234,7 @@ const handleSendCode = async () => {
             <div className='flex justify-center'>
               <button
                 onClick={handleVerifyCode}
-                className="w-full bg-main hover:bg-sec hover:text-gray-700 dark:bg-gray-900 text-white font-medium py-2 duration-300 rounded-sm text-xs md:text-sm"
+                className="w-full bg-main hover:opacity-80 cursor-pointer dark:bg-gray-900 text-white font-medium py-2 duration-300 text-xs md:text-sm"
               >
                 Verify Code
               </button>
@@ -298,7 +298,7 @@ const handleSendCode = async () => {
               <button
                 onClick={handleResetPassword}
                 disabled={confirmPassword !== password || password.length !== 4}
-                className={`w-full bg-main dark:bg-gray-900 hover:bg-sec hover:text-gray-700 text-white font-medium py-2 rounded-sm duration-300 text-xs md:text-sm ${
+                className={`w-full bg-main dark:bg-gray-900 hover:opacity-80 text-white font-medium py-2 cursor-pointer duration-300 text-xs md:text-sm ${
                   confirmPassword !== password || password.length !== 4 ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >

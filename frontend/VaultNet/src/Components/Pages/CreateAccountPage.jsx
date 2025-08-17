@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import {  useContext, useState } from "react";
 import { AuthContext } from "../Context/AuthContext";
 import axios from "../../axiosInstance"; // or your axios config file path
 import { toast } from "react-toastify";
@@ -27,7 +27,7 @@ import SetAtmPinPage from "./AccountCreation/SetAtmPinPage";
 import Footer from "../Home/Footer";
 
 export default function BankAccountPage() {
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading} = useContext(AuthContext);
   const { account } = useContext(AuthContext);
   const [loadings, setLoading] = useState(false);
   const [showBalance, setShowBalance] = useState(false);
@@ -285,7 +285,7 @@ export default function BankAccountPage() {
                   </div>
                   {/* DOWNLOAD CARD BUTTON */}
                   <div className="flex flex-col md:flex-row justify-center gap-5 md:gap-10 py-10">
-                    <button className="bg-sec text-gray-800 hover:bg-gray-100 duration-300 px-4 py-2 flex items-center gap-2 justify-center"
+                    <button className="bg-main text-white hover:opacity-80 cursor-pointer duration-300 px-4 py-2 flex items-center gap-2 justify-center"
                     onClick={handleSend}
                     >
                       <FaDownload /> Download Virtual Card (via Email)
@@ -330,13 +330,15 @@ export default function BankAccountPage() {
             {user.emailVerified ? (
               <div className="flex items-center justify-center h-screen text-gray-600 dark:text-gray-300 dark:bg-gray-900">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 dark:border-white"></div>
-              <span className="ml-3 font-normal">Loading...</span>
+              <span className="ml-3 font-normal"></span>
             </div>
             ) : (
               <>
               <h1 className="text-xl font-semibold  py-5 px-5 md:px-20 text-white bg-main uppercase flex gap-2 items-center mb-5"><RiAccountBoxFill className="text-4xl pt-1"/>Account Verification</h1>
-              <div className="flex justify-center items-center py-10 md:py-30 px-5 md:px-10">
-                <h1 className="flex flex-col lg:flex-row  gap-1 items-center text-xs md:text-lg"> <IoWarning className="text-2xl lg:text-xl"/>Please check your email indox, please click on verify button and verify your account!</h1>
+              <div className="flex flex-col justify-center items-center py-10 md:py-30 px-5 md:px-10">
+                <h1 className="flex flex-col lg:flex-row  gap-2 items-center text-xs md:text-lg font-semibold"> <IoWarning className="text-2xl lg:text-2xl"/>Please check your email indox, please click on verify button and verify your account. Or <span className="italic underline  transition-transform duration-300 hover:scale-110">
+                <Link to={`/vaultnet-verify-account?token=${user.verificationToken}`}>Click here!</Link>
+                </span></h1>
               </div>
               </>
             )}
@@ -364,7 +366,7 @@ export default function BankAccountPage() {
                 <button
                   onClick={handleCreateAccount}
                   disabled={loadings}
-                  className="bg-main hover:bg-green-900 text-white px-6 py-2 disabled:opacity-50 text-center"
+                  className="bg-main hover:opacity-70 cursor-pointer duration-300 text-white px-6 py-2 text-center"
                 >
                   {loadings ? "Creating..." : "Create Bank Account"}
                 </button>

@@ -11,7 +11,7 @@ export default function AdminChangeAccountPasswordUpdate() {
     confirmPassword: "",
   });
   const [showPasswords, setShowPasswords] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const accessToken = localStorage.getItem("accessToken");
 
   const handleChange = (e) => {
@@ -46,6 +46,7 @@ export default function AdminChangeAccountPasswordUpdate() {
 
     const loadingToast = toast.loading("Updating password...");
     try {
+      setLoading(true)
       const res = await axios.post(
         "/admin/change-account-password",
         {
@@ -76,7 +77,7 @@ export default function AdminChangeAccountPasswordUpdate() {
         isLoading: false,
         autoClose: 3000,
       });
-    }
+    }finally{setLoading(false)}
   };
 
   return (
@@ -108,6 +109,7 @@ export default function AdminChangeAccountPasswordUpdate() {
               <input
                 type={showPasswords ? "text" : "password"}
                 name="oldPassword"
+                placeholder="ENTER YOUR OLD PASSWORD"
                 value={form.oldPassword}
                 onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -124,6 +126,7 @@ export default function AdminChangeAccountPasswordUpdate() {
               <input
                 type={showPasswords ? "text" : "password"}
                 name="newPassword"
+                placeholder="ENTER YOUR NEW PASSWORD"
                 value={form.newPassword}
                 onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -144,6 +147,7 @@ export default function AdminChangeAccountPasswordUpdate() {
               <input
                 type={showPasswords ? "text" : "password"}
                 name="confirmPassword"
+                placeholder="CONFIRM YOUR NEW PASSWORD"
                 value={form.confirmPassword}
                 onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -170,9 +174,9 @@ export default function AdminChangeAccountPasswordUpdate() {
           <div className="flex justify-end px-14">
             <button
               type="submit"
-              className="w-full md:w-[40%] lg:w-[25%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+              className={`w-full md:w-[40%] lg:w-[25%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
             >
-              Update Password
+              {loading ? "Updating..." : "Update Password"}
             </button>
           </div>
         </form>

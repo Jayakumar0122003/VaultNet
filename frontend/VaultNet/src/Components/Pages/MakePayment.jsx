@@ -12,6 +12,7 @@ import { AuthContext } from "../Context/AuthContext";
 import SetAtmPinPage from "./AccountCreation/SetAtmPinPage";
 import Footer from "../Home/Footer";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 export default function MakePaymentForm() {
   const [activeTab, setActiveTab] = useState("account");
@@ -33,14 +34,35 @@ export default function MakePaymentForm() {
 
   const {loading,account} = useContext(AuthContext);
   const accessToken = localStorage.getItem("accessToken");
+  const [loadings, setLoadings] = useState(false);
 
   const handleChange = (e, type) => {
-    if (type === "account") {
-      setAccountForm({ ...accountForm, [e.target.name]: e.target.value });
-    } else {
-      setCardForm({ ...cardForm, [e.target.name]: e.target.value });
+  const { name, value } = e.target;
+
+  if (type === "account") {
+    let updatedValue = value;
+
+    // Format only account number fields
+    if (name === "senderAccountNumber" || name === "receiverAccountNumber") {
+      const digitsOnly = value.replace(/\D/g, "");
+      updatedValue = digitsOnly.replace(/(.{4})/g, "$1 ").trim();
     }
-  };
+
+    // ✅ Use updatedValue, not value
+    setAccountForm({ ...accountForm, [name]: updatedValue });
+
+  } else {
+    let updatedValue = value;
+
+    // Format only card number fields
+    if (name === "cardNumber" /* add other fields if needed */) {
+      const digitsOnly = value.replace(/\D/g, "");
+      updatedValue = digitsOnly.replace(/(.{4})/g, "$1 ").trim();
+    }
+
+    setCardForm({ ...cardForm, [name]: updatedValue });
+  }
+};
 
 
 
@@ -49,6 +71,7 @@ const handleSubmit = async (type) => {
   const toastId = toast.loading("Processing your payment...");
 
   try {
+    setLoadings(true);
     const url =
       type === "account"
         ? "/customer/transfer-account"
@@ -96,6 +119,8 @@ const handleSubmit = async (type) => {
       isLoading: false,
       autoClose: 4000,
     });
+  }{
+    setLoadings(false);
   }
 };
 
@@ -166,6 +191,7 @@ const handleSubmit = async (type) => {
               <input
                 type="text"
                 name="senderAccountNumber"
+                placeholder="ENTER YOUR ACCOUNT NUMBER"
                 value={accountForm.senderAccountNumber}
                 onChange={(e) => handleChange(e, "account")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main "
@@ -179,6 +205,7 @@ const handleSubmit = async (type) => {
               <input
                 type="text"
                 name="receiverAccountNumber"
+                placeholder="ENTER RECEIVER ACCOUNT NUMBER"
                 value={accountForm.receiverAccountNumber}
                 onChange={(e) => handleChange(e, "account")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -193,6 +220,7 @@ const handleSubmit = async (type) => {
                 type="number"
                 name="amount"
                 value={accountForm.amount}
+                placeholder="ENTER AMOUNT"
                 onChange={(e) => handleChange(e, "account")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
                 required
@@ -206,19 +234,24 @@ const handleSubmit = async (type) => {
                 type="password"
                 name="pin"
                 value={accountForm.pin}
+                placeholder="ENTER YOUR ATM CARD PIN"
                 onChange={(e) => handleChange(e, "account")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
                 required
               />
+              <Link to={"/vaultnet-forgot-atm-pin"} className="p-2 md:p-3 pb-0 text-xs hover:underline">Forgot ATM Card Pin?</Link>
             </div>
             <div></div>
             </div>
-            <div className="flex justify-center">
+            <div className="flex justify-end md:px-5 lg:px-20">
               <button
               type="submit"
-              className=" w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+              disabled={loadings}
+              className={`lg:px-10 bg-main text-white py-2 duration-300 transition w-full md:w-[40%] lg:w-[25%]
+                    ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}
+                  `}
             >
-              Proceed Payment
+             {loadings ? "Processing..." : "Proceed Payment"}
             </button>
             </div>
           </form>
@@ -241,6 +274,7 @@ const handleSubmit = async (type) => {
                 type="text"
                 name="cardNumber"
                 value={cardForm.cardNumber}
+                placeholder="ENTER YOUR ATM CARD NUMBER"
                 onChange={(e) => handleChange(e, "card")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
                 required
@@ -253,6 +287,7 @@ const handleSubmit = async (type) => {
               <input
                 type="text"
                 name="cardHolderName"
+                placeholder="ENTER YOUR CARD HOLDER NAME"
                 value={cardForm.cardHolderName}
                 onChange={(e) => handleChange(e, "card")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -278,6 +313,7 @@ const handleSubmit = async (type) => {
               <input
                 type="text"
                 name="cvv"
+                placeholder="ENTER CARD CVV"
                 value={cardForm.cvv}
                 onChange={(e) => handleChange(e, "card")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -290,10 +326,12 @@ const handleSubmit = async (type) => {
                 type="password"
                 name="pin"
                 value={cardForm.pin}
+                placeholder="ENTER YOUT ATM CARD PIN"
                 onChange={(e) => handleChange(e, "card")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
                 required
               />
+              <Link to={"/vaultnet-forgot-atm-pin"} className="p-2 md:p-2 pb-0 text-xs hover:underline">Forgot ATM Card Pin?</Link>
             </div>
             <div>
               <label className="text-xs px-1 font-medium mb-1 flex items-center gap-1 text-main">
@@ -302,6 +340,7 @@ const handleSubmit = async (type) => {
               <input
                 type="text"
                 name="receiverAccountNumber"
+                placeholder="ENTER RECEIVER ACCOUNT NUMBER"
                 value={cardForm.receiverAccountNumber}
                 onChange={(e) => handleChange(e, "card")}
                 className="w-full border border-gray-200 rounded-xs p-2 focus:outline-none focus:ring-1 focus:ring-main"
@@ -316,6 +355,7 @@ const handleSubmit = async (type) => {
                 type="number"
                 name="amount"
                 value={cardForm.amount}
+                placeholder="ENTER AMOUNT"
                 onChange={(e) => handleChange(e, "card")}
                 className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
                 required
@@ -323,12 +363,15 @@ const handleSubmit = async (type) => {
             </div>
             <div></div>
             </div>
-            <div className="flex justify-center md:mt-2">
+            <div className="flex justify-end md:px-5 lg:px-20">
               <button
               type="submit"
-              className="w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 hover:bg-green-900 cursor-pointer md:mt-4 uppercase"
+              disabled={loadings}
+              className={`lg:px-10 bg-main text-white py-2 duration-300 transition w-full md:w-[40%] lg:w-[25%]
+                    ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}
+                  `}
             >
-              Proceed Payment
+             {loadings ? "Processing..." : "Proceed Payment"}
             </button>
             </div>
           </form>

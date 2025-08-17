@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaUniversity, FaMoneyBillWave, FaLock } from "react-icons/fa";
 import axiosInstance from "../../../axiosInstance"; // your axios with token
 import {toast} from "react-toastify"
-// import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function ProfessionalAtmForm() {
   const [mode, setMode] = useState("deposit"); // "deposit" or "withdraw"
@@ -12,6 +12,16 @@ export default function ProfessionalAtmForm() {
   const [loading, setLoading] = useState(false);
   // const navigate = useNavigate();
 
+const handleAccountInput = (e) => {
+  // Remove existing spaces
+  let value = e.target.value.replace(/\s+/g, "");
+
+  // Add space every 4 digits
+  value = value.replace(/(\d{4})/g, "$1 ").trim();
+
+  // Store formatted value in state (with spaces)
+  setAccountNumber(value);
+};
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -62,7 +72,9 @@ export default function ProfessionalAtmForm() {
     setAmount("");
 
     // navigate("/create-bank-account"); // Redirect on success
-    window.location.reload();
+    setTimeout(() => {
+        window.location.reload();
+      }, 1000);
   } catch (err) {
     toast.dismiss();
     toast.error(
@@ -86,7 +98,7 @@ export default function ProfessionalAtmForm() {
           onClick={() => {
             setMode("deposit");
           }}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+          className={`flex items-center cursor-pointer gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
             mode === "deposit"
               ? "bg-green-600 text-white shadow-md"
               : "text-gray-600 hover:bg-gray-200"
@@ -102,7 +114,7 @@ export default function ProfessionalAtmForm() {
           onClick={() => {
             setMode("withdraw");
           }}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+          className={`flex items-center cursor-pointer gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
             mode === "withdraw"
               ? "bg-yellow-600 text-white shadow-md"
               : "text-gray-600 hover:bg-gray-200"
@@ -132,11 +144,11 @@ export default function ProfessionalAtmForm() {
               id="accountNumber"
               type="text"
               value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
+              onChange={handleAccountInput}
               disabled={loading}
               required
               className="w-full pl-10 pr-4 py-2 border border-gray-300 bg-white text-gray-800 rounded-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition"
-              placeholder="Enter your account number"
+              placeholder="ENTER YOUR ACCOUNT NUMBER"
               aria-describedby="accountNumberHelp"
             />
           </div>
@@ -159,9 +171,10 @@ export default function ProfessionalAtmForm() {
               disabled={loading}
               required={mode === "withdraw"}
               className="w-full px-4 py-2 border border-gray-300 bg-white text-black rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition"
-              placeholder="Enter your PIN"
+              placeholder="ENTER YOUR PIN"
               aria-describedby="pinHelp"
             />
+            <Link to={"/vaultnet-forgot-atm-pin"} className="p-2 md:p-4 pb-0 text-xs hover:underline">Forgot ATM Card Pin?</Link>
           </div>
         )}
 
@@ -183,7 +196,7 @@ export default function ProfessionalAtmForm() {
             disabled={loading}
             required
             className="w-full px-4 py-2 border border-gray-300 bg-white text-black rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Enter amount"
+            placeholder="ENTER AMOUNT"
             aria-describedby="amountHelp"
           />
         </div>
@@ -192,7 +205,7 @@ export default function ProfessionalAtmForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 rounded-sm font-bold text-white bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 shadow-lg transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full py-4 rounded-sm font-bold cursor-pointer text-white bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 shadow-lg transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading
             ? mode === "deposit"

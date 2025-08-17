@@ -10,6 +10,8 @@ export default function SetAtmPinPage() {
     confirmPin: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -25,6 +27,7 @@ export default function SetAtmPinPage() {
   const loadingToastId = toast.loading("Setting your ATM PIN...");
 
   try {
+    setLoading(true);
     const accessToken = localStorage.getItem("accessToken");
 
     const res = await axios.post(
@@ -58,7 +61,9 @@ export default function SetAtmPinPage() {
     });
 
     setFormData({ lastFourDigits: "", pin: "", confirmPin: "" });
-    window.location.reload();
+    setTimeout(() => {
+        window.location.reload();
+        }, 1000);
 
   } catch (err) {
     toast.update(loadingToastId, {
@@ -67,6 +72,8 @@ export default function SetAtmPinPage() {
       isLoading: false,
       autoClose: 3000,
     });
+  }finally{
+    setLoading(false);
   }
 };
 
@@ -90,7 +97,7 @@ export default function SetAtmPinPage() {
             {/* Last 4 Digits */}
             <div>
               <label className="text-xs px-1 font-medium mb-1 flex items-center gap-1 text-main">
-                <FaStarOfLife className="w-2 h-2" /> Last 4 Digits of ATM Card
+                <FaStarOfLife className="w-2 h-2" /> Last 4 Digits of Phone Number
               </label>
               <input
                 type="text"
@@ -138,12 +145,15 @@ export default function SetAtmPinPage() {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end px-5">
+          <div className="flex justify-end lg:px-5">
             <button
+            disabled={loading}
               type="submit"
-              className="w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+              className={`px-10 bg-main text-white py-2 duration-300 transition
+                    ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}
+                  `}
             >
-              Set PIN
+              {loading ? "Pin Setting..." : "Set PIN"}
             </button>
           </div>
         </form>

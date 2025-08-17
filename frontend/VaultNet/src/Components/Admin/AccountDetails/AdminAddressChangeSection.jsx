@@ -9,6 +9,7 @@ export default function AdminAddressChangeUpdate() {
   const [step, setStep] = useState(1);
   const [emailForm, setEmailForm] = useState({ email: "" });
   const {user} = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
   const [addressForm, setAddressForm] = useState({
     otp: "",
     firstName:"",
@@ -36,6 +37,7 @@ export default function AdminAddressChangeUpdate() {
   const loadingToast = toast.loading("Sending OTP...");
 
   try {
+    setLoading(true)
     const res = await axios.put(
       "/admin/change-details",
       { email: emailForm.email },
@@ -72,6 +74,8 @@ export default function AdminAddressChangeUpdate() {
       isLoading: false,
       autoClose: 3000,
     });
+  }finally{
+    setLoading(false)
   }
 };
 
@@ -81,6 +85,7 @@ export default function AdminAddressChangeUpdate() {
     e.preventDefault();
     const loadingToast = toast.loading("Updating address...");
     try {
+      setLoading(true)
       const res = await axios.post("/admin/verify-otp-details", addressForm, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
@@ -126,6 +131,8 @@ export default function AdminAddressChangeUpdate() {
         isLoading: false,
         autoClose: 3000,
       });
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -162,6 +169,7 @@ export default function AdminAddressChangeUpdate() {
                 <input
                   type="email"
                   name="email"
+                  placeholder="ENTER YOUR REGISTER EMAIL ADDRESS"
                   value={emailForm.email}
                   onChange={(e) => handleChange(e, "email")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -173,9 +181,9 @@ export default function AdminAddressChangeUpdate() {
             <div className="flex justify-end px-10">
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[20%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Send OTP
+                {loading ? "Sending..." : "Send OTP"}
               </button>
             </div>
           </form>
@@ -193,6 +201,7 @@ export default function AdminAddressChangeUpdate() {
                 <input
                   type="text"
                   name="otp"
+                  placeholder="ENTER OTP THAT SEND TO YOUT MAIL"
                   value={addressForm.otp}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -207,6 +216,7 @@ export default function AdminAddressChangeUpdate() {
                 <input
                   type="text"
                   name="firstName"
+                  placeholder="ENTER YOUR FIRST NAME"
                   value={addressForm.firstName}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -221,6 +231,7 @@ export default function AdminAddressChangeUpdate() {
                 <input
                   type="text"
                   name="lastName"
+                  placeholder="ENTER YOUR LAST NAME"
                   value={addressForm.lastName}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -235,6 +246,7 @@ export default function AdminAddressChangeUpdate() {
                 <input
                   type="text"
                   name="phone"
+                  placeholder="ENTER YOUR PHONE NUMBER"
                   value={addressForm.phone}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -249,6 +261,7 @@ export default function AdminAddressChangeUpdate() {
                 <input
                   type="text"
                   name="addressLine"
+                  placeholder="ENTER YOUR STREET ADDRESS LINE"
                   value={addressForm.addressLine}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -263,6 +276,7 @@ export default function AdminAddressChangeUpdate() {
                 <input
                   type="text"
                   name="city"
+                  placeholder="ENTER YOUR CIRY NAME"
                   value={addressForm.city}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -277,6 +291,7 @@ export default function AdminAddressChangeUpdate() {
                 <input
                   type="text"
                   name="state"
+                  placeholder="ENTER YOUR STATE NAME"
                   value={addressForm.state}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -291,6 +306,7 @@ export default function AdminAddressChangeUpdate() {
                 <input
                   type="text"
                   name="postalCode"
+                  placeholder="ENTER YOUR POSTALCODE"
                   value={addressForm.postalCode}
                   onChange={(e) => handleChange(e, "address")}
                   className="w-full border border-gray-200 rounded-xs p-2 text-sm focus:outline-none focus:ring-1 focus:ring-main"
@@ -322,9 +338,9 @@ export default function AdminAddressChangeUpdate() {
               </button>
               <button
                 type="submit"
-                className="w-full md:w-[40%] lg:w-[30%] bg-main text-white py-2 cursor-pointer hover:bg-green-900 uppercase"
+                className={`w-full md:w-[40%] lg:w-[30%] bg-main text-white py-2 cursor-pointer hover:opacity-80 duration-300 uppercase ${loading ? "cursor-not-allowed bg-main opacity-50" : "hover:opacity-80 cursor-pointer"}`}
               >
-                Verify & Update Address
+                {loading ? "Updating..." : "Verify & Update Address"}
               </button>
             </div>
           </form>

@@ -83,6 +83,7 @@ export function AuthProvider({ children }) {
 
   // Logout
   const logout = async () => {
+    const r =role;
     try {
       toast.loading("Exiting...");
       await axios.post("/auth/logout", {}, { withCredentials: true });
@@ -98,7 +99,11 @@ export function AuthProvider({ children }) {
       setAccount(null);
       localStorage.removeItem("accessToken");
       localStorage.removeItem("role");
-      navigate("/vaultnet-authenticate");
+      if(r=== "ADMIN"){
+        navigate("/vaultnet-authenticate-admin");
+      }else{
+        navigate("/vaultnet-authenticate");
+      }
     }
   };
 

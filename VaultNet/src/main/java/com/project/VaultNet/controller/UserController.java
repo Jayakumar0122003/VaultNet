@@ -11,9 +11,11 @@ import com.project.VaultNet.dto.details.AccountDetails;
 import com.project.VaultNet.dto.details.AccountDetailsResponse;
 import com.project.VaultNet.dto.details.DebitCardDetails;
 import com.project.VaultNet.dto.details.DebitCardDetailsRequest;
+import com.project.VaultNet.model.DebitCard;
 import com.project.VaultNet.model.Role;
 import com.project.VaultNet.model.Transaction;
 import com.project.VaultNet.model.Users;
+import com.project.VaultNet.repository.DebitCardRepository;
 import com.project.VaultNet.repository.UserRepository;
 import com.project.VaultNet.service.DebitCardService;
 import com.project.VaultNet.service.TransactionService;
@@ -43,6 +45,9 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    DebitCardRepository debitCardRepository;
 
     @GetMapping("/greet")
     public String userGreet(){
@@ -156,19 +161,37 @@ public class UserController {
 
 
     @GetMapping("/user/{userId}/transactions")
-    public ResponseEntity<?> getUserTransactions(@PathVariable Long userId, Principal principal) {
-        try {
-            // Fetch current logged-in user
-            Users currentUser = userRepository.findByEmail(principal.getName())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    public ResponseEntity<?> getUserTransactions(
+            @PathVariable Long userId,
+            @RequestParam String type, // "debit", "credit", or "all"
+            Principal principal) {
 
-            // Check access
+        try {
+            Users currentUser = userRepository.findByEmail(principal.getName())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
             if (!currentUser.getId().equals(userId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("success", false, "message", "Access denied"));
             }
 
-            List<Transaction> transactions = transactionService.getAllTransactionsForUser(userId);
+            DebitCard debitCard = debitCardRepository.findByEmail(currentUser.getEmail())
+                    .orElseThrow(() -> new RuntimeException("Debit card not found"));
+
+            List<Transaction> transactions;
+
+            switch (type.toLowerCase()) {
+                case "debit":
+                    transactions = transactionService.getUserDebits(debitCard.getId());
+                    break;
+                case "credit":
+                    transactions = transactionService.getUserCredits(debitCard.getId());
+                    break;
+                case "all":
+                default:
+                    transactions = transactionService.getFullHistory(debitCard.getId());
+                    break;
+            }
 
             if (transactions.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -177,75 +200,11 @@ public class UserController {
 
             return ResponseEntity.ok(Map.of("success", true, "transactions", transactions));
 
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("success", false, "message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "message", "Failed to fetch transactions: " + e.getMessage()));
         }
     }
-
-
-    @GetMapping("/user/{userId}/debit")
-    public ResponseEntity<?> getDebitTransactions(@PathVariable Long userId, Principal principal) {
-        try {
-            Users currentUser = userRepository.findByEmail(principal.getName())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-            if (!currentUser.getId().equals(userId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Map.of("success", false, "message", "Access denied"));
-            }
-
-            List<Transaction> transactions = transactionService.getDebitTransactions(userId);
-
-            if (transactions.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("success", false, "message", "No debit transactions found"));
-            }
-
-            return ResponseEntity.ok(Map.of("success", true, "transactions", transactions));
-
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("success", false, "message", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("success", false, "message", "Failed to fetch debit transactions: " + e.getMessage()));
-        }
-    }
-
-
-    @GetMapping("/user/{userId}/credit")
-    public ResponseEntity<?> getCreditTransactions(@PathVariable Long userId, Principal principal) {
-        try {
-            Users currentUser = userRepository.findByEmail(principal.getName())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-            if (!currentUser.getId().equals(userId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Map.of("success", false, "message", "Access denied"));
-            }
-
-            List<Transaction> transactions = transactionService.getCreditTransactions(userId);
-
-            if (transactions.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("success", false, "message", "No credit transactions found"));
-            }
-
-            return ResponseEntity.ok(Map.of("success", true, "transactions", transactions));
-
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("success", false, "message", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("success", false, "message", "Failed to fetch credit transactions: " + e.getMessage()));
-        }
-    }
-
 
 
     @PostMapping("/deposit-money")
@@ -302,9 +261,9 @@ public class UserController {
 
 
     @PostMapping("/account-creation")
-    public ResponseEntity<?> createAccount(@RequestBody AccountCreationRequest request) {
+    public ResponseEntity<?> createAccount(@RequestBody AccountCreationRequest request, Principal principal) {
         try {
-            AccountCreationResponse response = userService.createAccount(request);
+            AccountCreationResponse response = userService.createAccount(request, principal);
 
             HttpStatus status = response.isSuccess() ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST;
 
