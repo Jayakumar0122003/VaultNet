@@ -264,7 +264,7 @@ const handleSignupSubmit = async (e) => {
           {/* Forgot Password link */}
           <div className="text-right">
             <Link
-              href="/vaultnet-authenticate-forgot-password"
+              to="/vaultnet-authenticate-forgot-password"
               className="text-sm text-main hover:underline"
             >
               Forgot Password?
