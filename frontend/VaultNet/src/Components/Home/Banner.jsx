@@ -54,7 +54,7 @@ export default function Banner() {
             >
               View Profile
             </Link>:<Link
-              href="/vaultnet-bank-account"
+              to="/vaultnet-bank-account"
               className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"
             >
               Bank Account
@@ -62,7 +62,7 @@ export default function Banner() {
             </>
             :
             <Link
-              href="/vaultnet-authenticate?mode=signup"
+              to="/vaultnet-authenticate?mode=signup"
               className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"
             >
               Get Started
