@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { AuthContext } from "../Context/AuthContext";
 import { useContext } from "react";
-
+import { Link } from "react-router-dom";
 export default function Banner() {
   const {user,loading} = useContext(AuthContext);
   if (loading) {
