@@ -51,7 +51,7 @@ export default function AppRoutes() {
     } 
   />
       <Route
-        path="/vaultnet-authenticate-forgot-password"
+        path="/#/vaultnet-authenticate-forgot-password"
         element={<ForgotPasswordPage />}
       />
 

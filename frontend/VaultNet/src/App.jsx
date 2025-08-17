@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter as Router } from "react-router-dom";
+import { HashRouter as Router } from "react-router-dom";
 import { ToastContainer, Bounce } from "react-toastify";
 import { AuthProvider } from "./Components/Context/AuthProvider";
 
