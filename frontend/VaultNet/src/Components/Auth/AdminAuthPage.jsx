@@ -232,12 +232,12 @@ const handleLoginSubmit = async (e) => {
           </div>
           {/* Forgot Password link */}
           <div className="text-right">
-            <a
+            <Link
               href="/vaultnet-authenticate-forgot-password"
               className="text-sm text-main hover:underline"
             >
               Forgot Password?
-            </a>
+            </Link>
           </div>
           </div>
 

@@ -1,5 +1,5 @@
 // src/AppRoutes.jsx
-import {HashRouter as Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "./Components/Context/AuthContext";
 
