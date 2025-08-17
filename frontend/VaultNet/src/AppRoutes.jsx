@@ -1,5 +1,5 @@
 // src/AppRoutes.jsx
-import { Routes, Route } from "react-router-dom";
+import {HashRouter as Routes, Route } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "./Components/Context/AuthContext";
 
@@ -51,7 +51,7 @@ export default function AppRoutes() {
     } 
   />
       <Route
-        path="/#/vaultnet-authenticate-forgot-password"
+        path="/vaultnet-authenticate-forgot-password"
         element={<ForgotPasswordPage />}
       />
 
