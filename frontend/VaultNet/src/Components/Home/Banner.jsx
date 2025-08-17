@@ -48,31 +48,30 @@ export default function Banner() {
             {user ? 
             <>
             {user.role === "ADMIN" ?
-            <a
-              href="/vaultnet-admin-profile-details"
+            <Link
+              to="/vaultnet-admin-profile-details"
               className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"
             >
               View Profile
-            </a>:<a
+            </Link>:<Link
               href="/vaultnet-bank-account"
               className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"
             >
               Bank Account
-            </a>}
+            </Link>}
             </>
             :
-            <a
+            <Link
               href="/vaultnet-authenticate?mode=signup"
               className="bg-main text-white px-20 py-3 md:px-6 md:py-3 rounded-full font-semibold hover:bg-sec transition hover:text-black"
             >
               Get Started
-            </a>}
-            <a
-              href="#features"
+            </Link>}
+            <p
               className="text-main font-semibold hover:underline hover:text-black"
             >
               See Features →
-            </a>
+            </p>
           </motion.div>
         </div>
 
